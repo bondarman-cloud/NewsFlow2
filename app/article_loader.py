@@ -22,41 +22,58 @@ class ArticleLoader:
     }
 
     async def load(self, article: Article) -> Article:
-        request_url = await self._resolve_google_news_url(article.url)
+        original_url = article.url
+        resolved_url = await self._resolve_google_news_url(original_url)
 
-        async with httpx.AsyncClient(
-            timeout=httpx.Timeout(30.0),
-            follow_redirects=True,
-            headers=self.HEADERS,
-        ) as client:
-            response = await client.get(request_url)
-            response.raise_for_status()
+        try:
+            html, response_url = await self._fetch_html(resolved_url)
+            final_url = response_url
+            content_url = final_url
+            logger.info("Оригинальная страница загружена: {}", final_url)
+        except httpx.HTTPError as exc:
+            if resolved_url == original_url or "news.google." not in urlparse(original_url).netloc:
+                raise
 
-        final_url = str(response.url)
-        html = response.text
+            logger.warning(
+                "Официальный сайт недоступен ({}). Использую данные Google News: {}",
+                exc,
+                resolved_url,
+            )
+            html, _ = await self._fetch_html(original_url)
+            final_url = resolved_url
+            content_url = original_url
+
         soup = BeautifulSoup(html, "html.parser")
 
         canonical = soup.find("link", rel=lambda value: value and "canonical" in value)
         canonical_url = canonical.get("href") if canonical else None
         if canonical_url:
-            candidate = urljoin(final_url, str(canonical_url))
+            candidate = urljoin(content_url, str(canonical_url))
             if "news.google." not in urlparse(candidate).netloc:
                 final_url = candidate
 
         article.url = final_url
-        article.image_url = article.image_url or self._extract_image(soup, final_url)
-        article.content = (
-            trafilatura.extract(
-                html,
-                url=final_url,
-                include_comments=False,
-                include_tables=False,
-                favor_precision=True,
-            )
-            or article.rss_summary
+        article.image_url = article.image_url or self._extract_image(soup, content_url)
+        extracted = trafilatura.extract(
+            html,
+            url=content_url,
+            include_comments=False,
+            include_tables=False,
+            favor_precision=True,
         )
-        logger.info("Страница загружена: {} символов, {}", len(article.content), final_url)
+        article.content = extracted or article.rss_summary or article.title
+        logger.info("Материал подготовлен: {} символов, {}", len(article.content), final_url)
         return article
+
+    async def _fetch_html(self, url: str) -> tuple[str, str]:
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(12.0),
+            follow_redirects=True,
+            headers=self.HEADERS,
+        ) as client:
+            response = await client.get(url)
+            response.raise_for_status()
+        return response.text, str(response.url)
 
     async def _resolve_google_news_url(self, url: str) -> str:
         host = urlparse(url).netloc.lower()
