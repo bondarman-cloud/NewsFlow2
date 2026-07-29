@@ -13,6 +13,8 @@ from app.telegram import TelegramPublisher
 
 
 class NewsFlowService:
+    MAX_AI_ATTEMPTS = 20
+
     def __init__(self) -> None:
         self._database = PublicationDatabase(settings.database_path)
         self._sources = SourceManager()
@@ -55,12 +57,24 @@ class NewsFlowService:
             "load_errors": 0,
             "no_image": 0,
             "ai_rejected": 0,
+            "ai_attempts": 0,
         }
 
         try:
             articles = await self._sources.fetch()
+            articles.sort(
+                key=lambda item: (
+                    self._filter.priority(item),
+                    item.published_at or datetime.min.replace(tzinfo=timezone.utc),
+                ),
+                reverse=True,
+            )
+
             for article in articles:
                 if published >= settings.max_articles_per_run:
+                    break
+                if counters["ai_attempts"] >= self.MAX_AI_ATTEMPTS:
+                    logger.info("Достигнут лимит AI-проверок за проход: {}", self.MAX_AI_ATTEMPTS)
                     break
 
                 original_url = article.url
@@ -73,7 +87,12 @@ class NewsFlowService:
                     self._database.save(article, "filtered", aliases=(original_url,))
                     continue
 
-                logger.info("Кандидат [{}]: {}", article.source, article.title)
+                logger.info(
+                    "Кандидат [{}], приоритет={}: {}",
+                    article.source,
+                    self._filter.priority(article),
+                    article.title,
+                )
                 try:
                     article = await self._loader.load(article)
                 except Exception as exc:
@@ -92,6 +111,7 @@ class NewsFlowService:
                     self._database.save(article, "no_image", aliases=(original_url,))
                     continue
 
+                counters["ai_attempts"] += 1
                 editorial = await self._editor.process(article)
                 if not editorial.publish:
                     counters["ai_rejected"] += 1
@@ -115,12 +135,13 @@ class NewsFlowService:
 
             logger.info(
                 "Итог: опубликовано={}, обработано ранее={}, локальный фильтр={}, "
-                "ошибки загрузки={}, без картинки={}, отклонено AI={}",
+                "ошибки загрузки={}, без картинки={}, AI-проверок={}, отклонено AI={}",
                 published,
                 counters["already_processed"],
                 counters["filtered"],
                 counters["load_errors"],
                 counters["no_image"],
+                counters["ai_attempts"],
                 counters["ai_rejected"],
             )
             return published
