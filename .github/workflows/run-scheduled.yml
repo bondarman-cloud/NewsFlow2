@@ -24,9 +24,9 @@ jobs:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       DATABASE_PATH: data/newsflow2.db
       MAX_ARTICLES_PER_RUN: 1
-      MAX_CANDIDATES: 120
+      MAX_CANDIDATES: 500
       MAX_AGE_HOURS: 336
-      # 55 minutes: tolerates a small GitHub scheduler delay without skipping a full slot.
+      # 55 minutes tolerates a small scheduler delay without skipping a full slot.
       PUBLISH_INTERVAL: 3300
       FORCE_PUBLISH: false
       LOG_LEVEL: INFO
@@ -48,9 +48,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/newsflow2.db
-          key: newsflow2-db-${{ github.run_id }}
+          key: newsflow2-db-v2-${{ github.run_id }}
           restore-keys: |
-            newsflow2-db-
+            newsflow2-db-v2-
 
       - name: Show trigger
         run: |
