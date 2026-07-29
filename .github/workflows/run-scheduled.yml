@@ -1,0 +1,76 @@
+name: Scheduled NewsFlow2
+run-name: NewsFlow2 automatic
+
+on:
+  schedule:
+    # GitHub cron uses UTC. The minute value is the same in Uruguay.
+    - cron: "19 * * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: newsflow2-production
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      DATABASE_PATH: data/newsflow2.db
+      MAX_ARTICLES_PER_RUN: 1
+      MAX_CANDIDATES: 120
+      MAX_AGE_HOURS: 336
+      # 55 minutes: tolerates a small GitHub scheduler delay without skipping a full slot.
+      PUBLISH_INTERVAL: 3300
+      FORCE_PUBLISH: false
+      LOG_LEVEL: INFO
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Prepare runtime
+        run: mkdir -p data cache/images
+
+      - name: Restore publication database
+        uses: actions/cache@v4
+        with:
+          path: data/newsflow2.db
+          key: newsflow2-db-${{ github.run_id }}
+          restore-keys: |
+            newsflow2-db-
+
+      - name: Show trigger
+        run: |
+          echo "Trigger: ${{ github.event_name }}"
+          echo "Schedule: ${{ github.event.schedule }}"
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+
+      - name: Validate secrets
+        run: |
+          python - <<'PY'
+          import os
+          missing = [name for name in ("BOT_TOKEN", "CHANNEL_ID", "GEMINI_API_KEY") if not os.getenv(name)]
+          if missing:
+              raise SystemExit("Missing GitHub secrets: " + ", ".join(missing))
+          print("Required secrets are configured.")
+          PY
+
+      - name: Publish one article
+        run: python main.py
