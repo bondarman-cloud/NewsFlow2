@@ -1,0 +1,47 @@
+sources:
+  - name: MSI
+    url: "https://news.google.com/rss/search?q=site%3Amsi.com+MSI+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: ASUS / ROG
+    url: "https://news.google.com/rss/search?q=site%3Apress.asus.com+ASUS+OR+ROG+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Acer / Predator
+    url: "https://news.google.com/rss/search?q=site%3Anews.acer.com+Acer+OR+Predator+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Colorful
+    url: "https://news.google.com/rss/search?q=site%3Acolorful.cn+Colorful+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: GIGABYTE / AORUS
+    url: "https://news.google.com/rss/search?q=site%3Agigabyte.com+GIGABYTE+OR+AORUS+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: ASRock
+    url: "https://news.google.com/rss/search?q=site%3Aasrock.com+ASRock+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: ZOTAC
+    url: "https://news.google.com/rss/search?q=site%3Azotac.com+ZOTAC+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: NVIDIA
+    url: "https://news.google.com/rss/search?q=site%3Anvidia.com+GeForce+OR+GPU+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: AMD
+    url: "https://news.google.com/rss/search?q=site%3Aamd.com+Ryzen+OR+Radeon+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Intel
+    url: "https://news.google.com/rss/search?q=site%3Aintel.com+processor+OR+graphics+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Corsair
+    url: "https://news.google.com/rss/search?q=site%3Acorsair.com+Corsair+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Logitech G
+    url: "https://news.google.com/rss/search?q=site%3Alogitechg.com+Logitech+G+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Razer
+    url: "https://news.google.com/rss/search?q=site%3Arazer.com+Razer+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: SteelSeries
+    url: "https://news.google.com/rss/search?q=site%3Asteelseries.com+SteelSeries+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Cooler Master
+    url: "https://news.google.com/rss/search?q=site%3Acoolermaster.com+Cooler+Master+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Thermaltake
+    url: "https://news.google.com/rss/search?q=site%3Athermaltake.com+Thermaltake+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Lenovo / Legion
+    url: "https://news.google.com/rss/search?q=site%3Alenovo.com+Legion+OR+laptop+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Dell / Alienware
+    url: "https://news.google.com/rss/search?q=site%3Adell.com+Alienware+OR+monitor+OR+laptop+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: HP / OMEN
+    url: "https://news.google.com/rss/search?q=site%3Ahp.com+OMEN+OR+laptop+OR+monitor+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: LG
+    url: "https://news.google.com/rss/search?q=site%3Algnewsroom.com+monitor+OR+display+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Samsung
+    url: "https://news.google.com/rss/search?q=site%3Anews.samsung.com+monitor+OR+display+OR+SSD+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: BenQ
+    url: "https://news.google.com/rss/search?q=site%3Abenq.com+monitor+OR+display+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: ViewSonic
+    url: "https://news.google.com/rss/search?q=site%3Aviewsonic.com+monitor+OR+display+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
