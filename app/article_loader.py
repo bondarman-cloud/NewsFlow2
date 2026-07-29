@@ -1,9 +1,11 @@
+import asyncio
 import json
 from urllib.parse import urljoin, urlparse
 
 import httpx
 import trafilatura
 from bs4 import BeautifulSoup
+from googlenewsdecoder import gnewsdecoder
 
 from app.logger import logger
 from app.models import Article
@@ -20,12 +22,14 @@ class ArticleLoader:
     }
 
     async def load(self, article: Article) -> Article:
+        request_url = await self._resolve_google_news_url(article.url)
+
         async with httpx.AsyncClient(
             timeout=httpx.Timeout(30.0),
             follow_redirects=True,
             headers=self.HEADERS,
         ) as client:
-            response = await client.get(article.url)
+            response = await client.get(request_url)
             response.raise_for_status()
 
         final_url = str(response.url)
@@ -53,6 +57,27 @@ class ArticleLoader:
         )
         logger.info("Страница загружена: {} символов, {}", len(article.content), final_url)
         return article
+
+    async def _resolve_google_news_url(self, url: str) -> str:
+        host = urlparse(url).netloc.lower()
+        if "news.google." not in host:
+            return url
+
+        try:
+            result = await asyncio.to_thread(gnewsdecoder, url)
+        except Exception as exc:
+            logger.warning("Google News URL не декодирован: {}", exc)
+            return url
+
+        if isinstance(result, dict) and result.get("status"):
+            decoded_url = str(result.get("decoded_url", "")).strip()
+            if decoded_url and "news.google." not in urlparse(decoded_url).netloc.lower():
+                logger.info("Google News URL раскрыт: {}", decoded_url)
+                return decoded_url
+
+        message = result.get("message") if isinstance(result, dict) else result
+        logger.warning("Google News URL остался обёрткой: {}", message)
+        return url
 
     def _extract_image(self, soup: BeautifulSoup, base_url: str) -> str | None:
         selectors = (
