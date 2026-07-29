@@ -53,6 +53,7 @@ class NewsFlowService:
         published = 0
         counters = {
             "already_processed": 0,
+            "duplicates": 0,
             "filtered": 0,
             "load_errors": 0,
             "no_image": 0,
@@ -78,8 +79,9 @@ class NewsFlowService:
                     break
 
                 original_url = article.url
-                if self._database.exists(original_url):
-                    counters["already_processed"] += 1
+                if self._database.is_duplicate(article):
+                    counters["duplicates"] += 1
+                    self._database.save(article, "duplicate", aliases=(original_url,))
                     continue
 
                 if not self._filter.accepts(article):
@@ -100,8 +102,10 @@ class NewsFlowService:
                     logger.warning("Страница не загружена {}: {}", original_url, exc)
                     continue
 
-                if self._database.exists(article.url):
-                    counters["already_processed"] += 1
+                # The same launch can enter through several Google News searches and
+                # slightly different URLs. Check again after resolving the real page.
+                if self._database.is_duplicate(article):
+                    counters["duplicates"] += 1
                     self._database.save(article, "duplicate", aliases=(original_url,))
                     continue
 
@@ -134,10 +138,11 @@ class NewsFlowService:
                 logger.info("Опубликовано: {}", article.url)
 
             logger.info(
-                "Итог: опубликовано={}, обработано ранее={}, локальный фильтр={}, "
+                "Итог: опубликовано={}, обработано ранее={}, дубли={}, локальный фильтр={}, "
                 "ошибки загрузки={}, без картинки={}, AI-проверок={}, отклонено AI={}",
                 published,
                 counters["already_processed"],
+                counters["duplicates"],
                 counters["filtered"],
                 counters["load_errors"],
                 counters["no_image"],
