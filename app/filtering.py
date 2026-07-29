@@ -26,12 +26,15 @@ class HardwareNewsFilter:
 
     EXCLUDED_KEYWORDS = {
         "smartphone", "phone", "android tablet", "e-bike", "ebike", "scooter",
-        "automotive", "vehicle", "server platform", "data center", "datacenter",
-        "enterprise ai", "ai factory", "healthcare", "medical", "earnings", "revenue",
-        "financial results", "award", "awards", "partnership", "partners with",
-        "sponsorship", "esports tournament", "giveaway", "promotion", "discount",
-        "bios update", "driver update", "firmware update", "how to", "guide",
-        "feedback thread", "support thread", "known issues",
+        "automotive", "vehicle", "server platform", "server motherboard", "servers powered",
+        "data center", "datacenter", "enterprise ai", "ai factory", "healthcare",
+        "medical", "earnings", "revenue", "financial results", "award", "awards",
+        "partnership", "partners with", "sponsorship", "esports tournament", "giveaway",
+        "promotion", "discount", "warehouse sale", "feedback thread", "support thread",
+        "known issues", "supported operating systems", "software and driver downloads",
+        "driver update", "bios update", "firmware update", "how to", "guide",
+        "what is the", "how do", "best laptops", "search results for", "geforce now",
+        "cloud gaming", "login", "explore:", "celebration", "win rtx",
     }
 
     @staticmethod
@@ -42,7 +45,10 @@ class HardwareNewsFilter:
         text = self._normalize(f"{article.title} {article.rss_summary}")
         if any(term in text for term in self.EXCLUDED_KEYWORDS):
             return False
-        return any(term in text for term in self.PRODUCT_KEYWORDS)
+
+        has_product = any(term in text for term in self.PRODUCT_KEYWORDS)
+        has_release = any(term in text for term in self.RELEASE_KEYWORDS)
+        return has_product and has_release
 
     def priority(self, article: Article) -> int:
         title = self._normalize(article.title)
