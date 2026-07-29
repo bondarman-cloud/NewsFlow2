@@ -11,6 +11,7 @@ from app.models import Article
 
 class PublicationDatabase:
     DUPLICATE_TITLE_THRESHOLD = 0.90
+    PIPELINE_VERSION = 4
 
     def __init__(self, path: Path) -> None:
         self._path = path
@@ -35,7 +36,8 @@ class PublicationDatabase:
                     source TEXT NOT NULL,
                     title TEXT NOT NULL,
                     article_published_at TEXT,
-                    created_at TEXT NOT NULL
+                    created_at TEXT NOT NULL,
+                    pipeline_version INTEGER NOT NULL DEFAULT 0
                 )
                 """
             )
@@ -48,6 +50,11 @@ class PublicationDatabase:
                 connection.execute("ALTER TABLE processed_articles ADD COLUMN canonical_url TEXT")
             if "title_key" not in columns:
                 connection.execute("ALTER TABLE processed_articles ADD COLUMN title_key TEXT")
+            if "pipeline_version" not in columns:
+                connection.execute(
+                    "ALTER TABLE processed_articles "
+                    "ADD COLUMN pipeline_version INTEGER NOT NULL DEFAULT 0"
+                )
 
             rows = connection.execute(
                 "SELECT id, url, title FROM processed_articles "
@@ -70,6 +77,10 @@ class PublicationDatabase:
             connection.execute(
                 "CREATE INDEX IF NOT EXISTS idx_processed_title_status "
                 "ON processed_articles(title_key, status)"
+            )
+            connection.execute(
+                "CREATE INDEX IF NOT EXISTS idx_processed_pipeline_version "
+                "ON processed_articles(pipeline_version, status)"
             )
             connection.commit()
 
@@ -104,7 +115,8 @@ class PublicationDatabase:
                 """
                 SELECT 1
                 FROM processed_articles
-                WHERE url = ? OR canonical_url = ?
+                WHERE status = 'published'
+                  AND (url = ? OR canonical_url = ?)
                 LIMIT 1
                 """,
                 (url, canonical),
@@ -120,11 +132,24 @@ class PublicationDatabase:
                 """
                 SELECT 1
                 FROM processed_articles
-                WHERE url = ? OR canonical_url = ?
-                   OR (status = 'published' AND title_key = ?)
+                WHERE (
+                    status = 'published'
+                    AND (url = ? OR canonical_url = ? OR title_key = ?)
+                ) OR (
+                    status != 'published'
+                    AND pipeline_version = ?
+                    AND (url = ? OR canonical_url = ?)
+                )
                 LIMIT 1
                 """,
-                (article.url, canonical, key),
+                (
+                    article.url,
+                    canonical,
+                    key,
+                    self.PIPELINE_VERSION,
+                    article.url,
+                    canonical,
+                ),
             ).fetchone()
             if exact is not None:
                 return True
@@ -164,10 +189,32 @@ class PublicationDatabase:
             for url in urls:
                 connection.execute(
                     """
-                    INSERT OR IGNORE INTO processed_articles
+                    INSERT INTO processed_articles
                         (url, canonical_url, title_key, status, source, title,
-                         article_published_at, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                         article_published_at, created_at, pipeline_version)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(url) DO UPDATE SET
+                        canonical_url = excluded.canonical_url,
+                        title_key = excluded.title_key,
+                        status = CASE
+                            WHEN processed_articles.status = 'published'
+                                 AND excluded.status != 'published'
+                            THEN processed_articles.status
+                            ELSE excluded.status
+                        END,
+                        source = excluded.source,
+                        title = excluded.title,
+                        article_published_at = COALESCE(
+                            excluded.article_published_at,
+                            processed_articles.article_published_at
+                        ),
+                        created_at = CASE
+                            WHEN processed_articles.status = 'published'
+                                 AND excluded.status != 'published'
+                            THEN processed_articles.created_at
+                            ELSE excluded.created_at
+                        END,
+                        pipeline_version = excluded.pipeline_version
                     """,
                     (
                         url,
@@ -178,6 +225,7 @@ class PublicationDatabase:
                         article.title,
                         article_time,
                         now,
+                        self.PIPELINE_VERSION,
                     ),
                 )
             connection.commit()
