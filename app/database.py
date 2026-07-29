@@ -20,9 +20,10 @@ class PublicationDatabase:
         with self._connect() as connection:
             connection.execute(
                 """
-                CREATE TABLE IF NOT EXISTS published_articles (
+                CREATE TABLE IF NOT EXISTS processed_articles (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     url TEXT NOT NULL UNIQUE,
+                    status TEXT NOT NULL,
                     source TEXT NOT NULL,
                     title TEXT NOT NULL,
                     article_published_at TEXT,
@@ -35,29 +36,42 @@ class PublicationDatabase:
     def exists(self, url: str) -> bool:
         with self._connect() as connection:
             row = connection.execute(
-                "SELECT 1 FROM published_articles WHERE url = ? LIMIT 1",
+                "SELECT 1 FROM processed_articles WHERE url = ? LIMIT 1",
                 (url,),
             ).fetchone()
         return row is not None
 
-    def save(self, article: Article) -> None:
+    def save(
+        self,
+        article: Article,
+        status: str,
+        aliases: tuple[str, ...] = (),
+    ) -> None:
+        urls = tuple(dict.fromkeys((article.url, *aliases)))
         now = datetime.now(timezone.utc).isoformat()
         article_time = article.published_at.isoformat() if article.published_at else None
         with self._connect() as connection:
-            connection.execute(
-                """
-                INSERT OR IGNORE INTO published_articles
-                    (url, source, title, article_published_at, created_at)
-                VALUES (?, ?, ?, ?, ?)
-                """,
-                (article.url, article.source, article.title, article_time, now),
-            )
+            for url in urls:
+                connection.execute(
+                    """
+                    INSERT OR IGNORE INTO processed_articles
+                        (url, status, source, title, article_published_at, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (url, status, article.source, article.title, article_time, now),
+                )
             connection.commit()
 
-    def latest_created_at(self) -> datetime | None:
+    def latest_published_at(self) -> datetime | None:
         with self._connect() as connection:
             row = connection.execute(
-                "SELECT created_at FROM published_articles ORDER BY id DESC LIMIT 1"
+                """
+                SELECT created_at
+                FROM processed_articles
+                WHERE status = 'published'
+                ORDER BY id DESC
+                LIMIT 1
+                """
             ).fetchone()
         if row is None:
             return None
