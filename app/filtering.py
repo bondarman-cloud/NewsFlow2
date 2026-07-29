@@ -14,13 +14,14 @@ class HardwareNewsFilter:
         "psu", "computer case", "pc case", "chassis", "cpu cooler", "liquid cooler",
         "aio cooler", "cooling fan", "router", "wi-fi 7", "wifi 7", "dock",
         "docking station", "capture card", "gaming handheld", "handheld pc",
+        "gaming monitor", "gaming laptop", "graphics", "pc hardware", "peripheral",
     }
 
     RELEASE_KEYWORDS = {
         "announce", "announces", "announced", "unveil", "unveils", "unveiled",
         "launch", "launches", "launched", "introduce", "introduces", "introduced",
         "release", "releases", "released", "availability", "available", "debuts",
-        "reveals", "ships", "shipping", "pre-order", "preorder",
+        "reveals", "ships", "shipping", "pre-order", "preorder", "new", "latest",
     }
 
     EXCLUDED_KEYWORDS = {
@@ -30,6 +31,7 @@ class HardwareNewsFilter:
         "financial results", "award", "awards", "partnership", "partners with",
         "sponsorship", "esports tournament", "giveaway", "promotion", "discount",
         "bios update", "driver update", "firmware update", "how to", "guide",
+        "feedback thread", "support thread", "known issues",
     }
 
     @staticmethod
@@ -40,7 +42,22 @@ class HardwareNewsFilter:
         text = self._normalize(f"{article.title} {article.rss_summary}")
         if any(term in text for term in self.EXCLUDED_KEYWORDS):
             return False
+        return any(term in text for term in self.PRODUCT_KEYWORDS)
 
-        has_product = any(term in text for term in self.PRODUCT_KEYWORDS)
-        has_release = any(term in text for term in self.RELEASE_KEYWORDS)
-        return has_product and has_release
+    def priority(self, article: Article) -> int:
+        title = self._normalize(article.title)
+        text = self._normalize(f"{article.title} {article.rss_summary}")
+        if any(term in text for term in self.EXCLUDED_KEYWORDS):
+            return -10_000
+
+        product_hits = sum(term in text for term in self.PRODUCT_KEYWORDS)
+        release_hits = sum(term in text for term in self.RELEASE_KEYWORDS)
+        title_release_hits = sum(term in title for term in self.RELEASE_KEYWORDS)
+        model_like = bool(re.search(r"\b[A-Z]{1,5}[- ]?\d{3,5}[A-Z0-9-]*\b", article.title))
+
+        return (
+            product_hits * 4
+            + release_hits * 5
+            + title_release_hits * 4
+            + (3 if model_like else 0)
+        )
