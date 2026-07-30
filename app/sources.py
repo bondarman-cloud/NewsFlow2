@@ -2,6 +2,7 @@ import asyncio
 import calendar
 from datetime import datetime, timedelta, timezone
 from typing import Any
+from urllib.parse import urlencode
 
 import feedparser
 import httpx
@@ -19,10 +20,79 @@ class SourceManager:
         "AppleWebKit/537.36 Chrome/131.0 Safari/537.36"
     )
 
+    DISCOVERY_QUERIES = (
+        (
+            "Hardware launches",
+            '(announces OR launches OR unveils OR introduces OR releases OR "now available") '
+            '("graphics card" OR GPU OR processor OR motherboard OR laptop OR "mini PC") '
+            'when:30d',
+        ),
+        (
+            "Memory and storage launches",
+            '(announces OR launches OR unveils OR introduces OR releases OR available OR debuts) '
+            '(DDR5 OR DDR6 OR "memory kit" OR DRAM OR SSD OR NVMe OR "external SSD" '
+            'OR "hard drive" OR HDD OR NAND) when:30d',
+        ),
+        (
+            "Monitor launches",
+            '(announces OR launches OR unveils OR introduces OR releases OR available) '
+            '("gaming monitor" OR OLED OR QD-OLED OR Mini-LED OR display) when:30d',
+        ),
+        (
+            "Cases cooling and PSUs",
+            '(announces OR launches OR unveils OR introduces OR releases OR available) '
+            '("PC case" OR chassis OR "power supply" OR PSU OR "CPU cooler" '
+            'OR "liquid cooler" OR fan) when:30d',
+        ),
+        (
+            "PC peripherals launches",
+            '(announces OR launches OR unveils OR introduces OR releases OR available) '
+            '(keyboard OR mouse OR headset OR microphone OR webcam OR "capture card" '
+            'OR controller OR router) when:30d',
+        ),
+        (
+            "TechPowerUp hardware",
+            'site:techpowerup.com (SSD OR DDR5 OR GPU OR motherboard OR monitor OR cooler '
+            'OR keyboard OR mouse OR laptop) when:30d',
+        ),
+        (
+            "Tom's Hardware launches",
+            'site:tomshardware.com (launches OR announces OR unveils OR releases OR available) '
+            '(SSD OR DDR5 OR GPU OR CPU OR motherboard OR monitor OR laptop) when:30d',
+        ),
+        (
+            "VideoCardz launches",
+            'site:videocardz.com (launches OR announces OR unveils OR releases OR available) '
+            '(GPU OR CPU OR motherboard OR memory OR SSD OR monitor OR laptop) when:30d',
+        ),
+        (
+            "Notebookcheck launches",
+            'site:notebookcheck.net (launches OR announces OR unveils OR releases OR available) '
+            '(laptop OR "mini PC" OR monitor OR SSD OR GPU OR processor) when:30d',
+        ),
+    )
+
     def __init__(self) -> None:
         data = yaml.safe_load(settings.sources_path.read_text(encoding="utf-8")) or {}
-        self._sources: list[dict[str, str]] = data.get("sources", [])
+        configured: list[dict[str, str]] = data.get("sources", [])
+        discovery = [
+            {"name": name, "url": self._google_news_url(query)}
+            for name, query in self.DISCOVERY_QUERIES
+        ]
+        self._sources = [*configured, *discovery]
         self._semaphore = asyncio.Semaphore(10)
+
+    @staticmethod
+    def _google_news_url(query: str) -> str:
+        params = urlencode(
+            {
+                "q": query,
+                "hl": "en-US",
+                "gl": "US",
+                "ceid": "US:en",
+            }
+        )
+        return f"https://news.google.com/rss/search?{params}"
 
     async def fetch(self) -> list[Article]:
         async with httpx.AsyncClient(
@@ -65,9 +135,6 @@ class SourceManager:
             len(articles),
             len(fresh),
         )
-
-        # Do not truncate here. The service must first rank all manufacturers by
-        # relevance, otherwise very active laptop brands crowd out memory and storage.
         return fresh
 
     async def _fetch_source(
@@ -84,7 +151,7 @@ class SourceManager:
             raise RuntimeError(str(feed.bozo_exception))
 
         articles: list[Article] = []
-        for entry in feed.entries[:25]:
+        for entry in feed.entries[:50]:
             link = str(entry.get("link", "")).strip()
             title = BeautifulSoup(str(entry.get("title", "")), "html.parser").get_text(
                 " ", strip=True
