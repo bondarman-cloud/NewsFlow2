@@ -18,18 +18,19 @@ class HardwareNewsFilter:
         "liquid cooler", "aio cooler", "cooling fan", "router", "wi-fi 7", "wifi 7",
         "dock", "docking station", "capture card", "gaming handheld", "handheld pc",
         "gaming monitor", "gaming laptop", "graphics", "pc hardware", "peripheral",
-        "ssd controller", "storage controller",
+        "ssd controller", "storage controller", "thermal paste", "case fan",
     }
 
     RELEASE_KEYWORDS = {
         "announce", "announces", "announced", "unveil", "unveils", "unveiled",
-        "launch", "launches", "launched", "introduce", "introduces", "introduced",
-        "release", "releases", "released", "availability", "available", "debuts",
-        "debut", "reveals", "revealed", "ships", "shipping", "pre-order", "preorder",
-        "new", "latest", "showcase", "showcases", "showcased", "demo", "demos",
-        "demonstrates", "expands", "expanded", "adds", "added", "presents",
+        "launch", "launches", "launched", "launching", "introduce", "introduces",
+        "introduced", "release", "releases", "released", "availability", "available",
+        "debuts", "debut", "reveals", "revealed", "ships", "shipping", "pre-order",
+        "preorder", "new", "latest", "showcase", "showcases", "showcased", "demo",
+        "demos", "demonstrates", "expands", "expanded", "adds", "added", "presents",
         "presented", "rolls out", "now available", "starts shipping", "brings",
-        "refreshes", "upgrades", "first look",
+        "refreshes", "upgrades", "first look", "arrives", "lands", "hits", "gets",
+        "comes in", "available now", "up for pre-order", "goes on sale",
     }
 
     EXCLUDED_KEYWORDS = {
@@ -42,8 +43,9 @@ class HardwareNewsFilter:
         "known issues", "supported operating systems", "software and driver downloads",
         "driver update", "bios update", "firmware update", "how to", "guide",
         "what is the", "how do", "best laptops", "search results for", "geforce now",
-        "cloud gaming", "login", "explore:", "celebration", "win rtx",
-        "market share", "shipment milestone", "ships globally", "certification",
+        "cloud gaming", "login", "explore:", "celebration", "win rtx", "review",
+        "market share", "shipment milestone", "certification", "rumor", "rumour",
+        "leak", "leaked", "benchmark leak", "concept product",
     }
 
     @staticmethod
@@ -55,9 +57,10 @@ class HardwareNewsFilter:
         if any(term in text for term in self.EXCLUDED_KEYWORDS):
             return False
 
-        has_product = any(term in text for term in self.PRODUCT_KEYWORDS)
-        has_release = any(term in text for term in self.RELEASE_KEYWORDS)
-        return has_product and has_release
+        # Google News summaries are often only a title plus publisher. Requiring a
+        # release verb here discarded legitimate SSD, memory and peripheral launches.
+        # Gemini performs the strict editorial decision later.
+        return any(term in text for term in self.PRODUCT_KEYWORDS)
 
     def priority(self, article: Article) -> int:
         title = self._normalize(article.title)
@@ -71,13 +74,16 @@ class HardwareNewsFilter:
         model_like = bool(re.search(r"\b[A-Z]{1,6}[- ]?\d{2,5}[A-Z0-9-]*\b", article.title))
         storage_bonus = sum(
             term in text
-            for term in ("ssd", "nvme", "hard drive", "hdd", "ddr5", "memory kit", "dram")
+            for term in (
+                "ssd", "nvme", "hard drive", "hdd", "ddr5", "ddr6",
+                "memory kit", "dram", "nand",
+            )
         )
 
         return (
             product_hits * 4
             + release_hits * 5
             + title_release_hits * 4
-            + storage_bonus * 3
+            + storage_bonus * 4
             + (3 if model_like else 0)
         )
