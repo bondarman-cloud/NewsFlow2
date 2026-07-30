@@ -29,8 +29,8 @@ class Settings(BaseSettings):
     )
 
     max_articles_per_run: int = Field(default=1, alias="MAX_ARTICLES_PER_RUN")
-    max_candidates: int = Field(default=120, alias="MAX_CANDIDATES")
-    max_age_hours: int = Field(default=336, alias="MAX_AGE_HOURS")
+    max_candidates: int = Field(default=1200, alias="MAX_CANDIDATES")
+    max_age_hours: int = Field(default=1440, alias="MAX_AGE_HOURS")
     publish_interval: int = Field(default=3300, alias="PUBLISH_INTERVAL")
     force_publish: bool = Field(default=False, alias="FORCE_PUBLISH")
     run_mode: str = Field(default="scheduled", alias="RUN_MODE")
