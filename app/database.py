@@ -11,7 +11,7 @@ from app.models import Article
 
 class PublicationDatabase:
     DUPLICATE_TITLE_THRESHOLD = 0.90
-    PIPELINE_VERSION = 5
+    PIPELINE_VERSION = 6
 
     def __init__(self, path: Path) -> None:
         self._path = path
