@@ -1,0 +1,52 @@
+id: hardware_news
+title: Hardware Radar
+filter: hardware
+base_tag: железо
+sources: data/sources.yaml
+prompt: bots/hardware_news/prompt.txt
+require_image: true
+query_exclusions: "-laptop -notebook -chromebook -ultrabook"
+
+defaults:
+  max_articles_per_run: 1
+  max_candidates: 1200
+  max_age_hours: 1440
+  publish_interval: 3300
+
+discovery_queries:
+  - name: Desktop hardware launches
+    query: >-
+      (announces OR launches OR unveils OR introduces OR releases OR "now available")
+      ("graphics card" OR GPU OR processor OR motherboard OR desktop OR "mini PC" OR workstation)
+      when:30d
+  - name: Memory and storage launches
+    query: >-
+      (announces OR launches OR unveils OR introduces OR releases OR available OR debuts)
+      (DDR5 OR DDR6 OR "memory kit" OR DRAM OR SSD OR NVMe OR "external SSD" OR
+      "hard drive" OR HDD OR NAND) when:30d
+  - name: Monitor launches
+    query: >-
+      (announces OR launches OR unveils OR introduces OR releases OR available)
+      ("gaming monitor" OR OLED OR QD-OLED OR Mini-LED OR display) when:30d
+  - name: Cases cooling and PSUs
+    query: >-
+      (announces OR launches OR unveils OR introduces OR releases OR available)
+      ("PC case" OR chassis OR "power supply" OR PSU OR "CPU cooler" OR
+      "liquid cooler" OR fan) when:30d
+  - name: PC peripherals launches
+    query: >-
+      (announces OR launches OR unveils OR introduces OR releases OR available)
+      (keyboard OR mouse OR headset OR microphone OR webcam OR "capture card" OR
+      controller OR router) when:30d
+  - name: TechPowerUp desktop hardware
+    query: >-
+      site:techpowerup.com (SSD OR DDR5 OR GPU OR motherboard OR monitor OR cooler OR
+      keyboard OR mouse OR desktop OR "mini PC") when:30d
+  - name: Tom's Hardware desktop launches
+    query: >-
+      site:tomshardware.com (launches OR announces OR unveils OR releases OR available)
+      (SSD OR DDR5 OR GPU OR CPU OR motherboard OR monitor OR desktop OR "mini PC") when:30d
+  - name: VideoCardz desktop launches
+    query: >-
+      site:videocardz.com (launches OR announces OR unveils OR releases OR available)
+      (GPU OR CPU OR motherboard OR memory OR SSD OR monitor OR desktop OR "mini PC") when:30d
