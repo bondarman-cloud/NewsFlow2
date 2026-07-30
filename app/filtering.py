@@ -6,19 +6,23 @@ from app.models import Article
 class HardwareNewsFilter:
     PRODUCT_KEYWORDS = {
         "graphics card", "gpu", "geforce", "radeon", "motherboard", "mainboard",
-        "processor", "cpu", "ryzen", "core ultra", "laptop", "notebook",
-        "gaming pc", "desktop", "mini pc", "workstation", "monitor", "display",
-        "oled", "qd-oled", "mini-led", "keyboard", "mouse", "headset",
-        "headphones", "earbuds", "microphone", "webcam", "controller", "gamepad",
-        "ssd", "solid state", "nvme", "m.2", "pcie 5.0", "pcie gen5", "pcie 4.0",
-        "external ssd", "portable ssd", "hard drive", "hdd", "storage", "flash drive",
-        "nand", "3d nand", "memory", "memory kit", "dram", "ddr5", "ddr6",
-        "udimm", "u-dimm", "sodimm", "so-dimm", "cudimm", "cu-dimm", "rdimm",
-        "power supply", "psu", "computer case", "pc case", "chassis", "cpu cooler",
-        "liquid cooler", "aio cooler", "cooling fan", "router", "wi-fi 7", "wifi 7",
-        "dock", "docking station", "capture card", "gaming handheld", "handheld pc",
-        "gaming monitor", "gaming laptop", "graphics", "pc hardware", "peripheral",
-        "ssd controller", "storage controller", "thermal paste", "case fan",
+        "processor", "cpu", "ryzen", "core ultra", "gaming pc", "desktop", "mini pc",
+        "workstation", "monitor", "display", "oled", "qd-oled", "mini-led", "keyboard",
+        "mouse", "headset", "headphones", "earbuds", "microphone", "webcam",
+        "controller", "gamepad", "ssd", "solid state", "nvme", "m.2", "pcie 5.0",
+        "pcie gen5", "pcie 4.0", "external ssd", "portable ssd", "hard drive", "hdd",
+        "storage", "flash drive", "nand", "3d nand", "memory", "memory kit", "dram",
+        "ddr5", "ddr6", "udimm", "u-dimm", "sodimm", "so-dimm", "cudimm",
+        "cu-dimm", "rdimm", "power supply", "psu", "computer case", "pc case",
+        "chassis", "cpu cooler", "liquid cooler", "aio cooler", "cooling fan", "router",
+        "wi-fi 7", "wifi 7", "dock", "docking station", "capture card",
+        "gaming handheld", "handheld pc", "gaming monitor", "graphics", "pc hardware",
+        "peripheral", "ssd controller", "storage controller", "thermal paste", "case fan",
+    }
+
+    LAPTOP_KEYWORDS = {
+        "laptop", "gaming laptop", "notebook", "gaming notebook", "chromebook",
+        "ultrabook", "mobile workstation", "laptop gpu", "laptop processor",
     }
 
     RELEASE_KEYWORDS = {
@@ -54,6 +58,8 @@ class HardwareNewsFilter:
 
     def accepts(self, article: Article) -> bool:
         text = self._normalize(f"{article.title} {article.rss_summary}")
+        if any(term in text for term in self.LAPTOP_KEYWORDS):
+            return False
         if any(term in text for term in self.EXCLUDED_KEYWORDS):
             return False
 
@@ -65,6 +71,8 @@ class HardwareNewsFilter:
     def priority(self, article: Article) -> int:
         title = self._normalize(article.title)
         text = self._normalize(f"{article.title} {article.rss_summary}")
+        if any(term in text for term in self.LAPTOP_KEYWORDS):
+            return -10_000
         if any(term in text for term in self.EXCLUDED_KEYWORDS):
             return -10_000
 
