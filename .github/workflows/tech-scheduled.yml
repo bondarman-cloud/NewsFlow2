@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   publish:
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.ENABLE_TECH_NEWS == 'true' }}
     uses: ./.github/workflows/run-bot.yml
     with:
       bot_id: tech_news
