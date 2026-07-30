@@ -3,7 +3,9 @@ run-name: Hardware News automatic
 
 on:
   schedule:
-    - cron: "19,49 * * * *"
+    # Three attempts near the start of every hour. The application interval
+    # prevents more than one successful scheduled publication per hour.
+    - cron: "3,13,23 * * * *"
   workflow_dispatch:
 
 permissions:
