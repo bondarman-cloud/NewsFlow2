@@ -1,47 +1,134 @@
 sources:
+  # Core PC and laptop manufacturers
   - name: MSI
-    url: "https://news.google.com/rss/search?q=site%3Amsi.com+MSI+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Amsi.com+MSI+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: ASUS / ROG
-    url: "https://news.google.com/rss/search?q=site%3Apress.asus.com+ASUS+OR+ROG+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Apress.asus.com+ASUS+OR+ROG+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: Acer / Predator
-    url: "https://news.google.com/rss/search?q=site%3Anews.acer.com+Acer+OR+Predator+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Anews.acer.com+Acer+OR+Predator+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: Colorful
-    url: "https://news.google.com/rss/search?q=site%3Acolorful.cn+Colorful+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Acolorful.cn+Colorful+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: GIGABYTE / AORUS
-    url: "https://news.google.com/rss/search?q=site%3Agigabyte.com+GIGABYTE+OR+AORUS+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Agigabyte.com+GIGABYTE+OR+AORUS+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: ASRock
-    url: "https://news.google.com/rss/search?q=site%3Aasrock.com+ASRock+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Aasrock.com+ASRock+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: ZOTAC
-    url: "https://news.google.com/rss/search?q=site%3Azotac.com+ZOTAC+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: NVIDIA
-    url: "https://news.google.com/rss/search?q=site%3Anvidia.com+GeForce+OR+GPU+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: AMD
-    url: "https://news.google.com/rss/search?q=site%3Aamd.com+Ryzen+OR+Radeon+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Intel
-    url: "https://news.google.com/rss/search?q=site%3Aintel.com+processor+OR+graphics+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Corsair
-    url: "https://news.google.com/rss/search?q=site%3Acorsair.com+Corsair+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Logitech G
-    url: "https://news.google.com/rss/search?q=site%3Alogitechg.com+Logitech+G+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Razer
-    url: "https://news.google.com/rss/search?q=site%3Arazer.com+Razer+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: SteelSeries
-    url: "https://news.google.com/rss/search?q=site%3Asteelseries.com+SteelSeries+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Cooler Master
-    url: "https://news.google.com/rss/search?q=site%3Acoolermaster.com+Cooler+Master+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Thermaltake
-    url: "https://news.google.com/rss/search?q=site%3Athermaltake.com+Thermaltake+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Azotac.com+ZOTAC+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: Lenovo / Legion
-    url: "https://news.google.com/rss/search?q=site%3Alenovo.com+Legion+OR+laptop+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Alenovo.com+Legion+OR+laptop+OR+desktop+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: Dell / Alienware
-    url: "https://news.google.com/rss/search?q=site%3Adell.com+Alienware+OR+monitor+OR+laptop+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Adell.com+Alienware+OR+monitor+OR+laptop+OR+desktop+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: HP / OMEN
-    url: "https://news.google.com/rss/search?q=site%3Ahp.com+OMEN+OR+laptop+OR+monitor+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Ahp.com+OMEN+OR+laptop+OR+monitor+OR+desktop+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Framework
+    url: "https://news.google.com/rss/search?q=site%3Aframe.work+Framework+laptop+OR+desktop+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: MINISFORUM
+    url: "https://news.google.com/rss/search?q=site%3Astore.minisforum.com+MINISFORUM+mini+PC+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+
+  # CPUs and GPUs
+  - name: NVIDIA
+    url: "https://news.google.com/rss/search?q=site%3Anvidia.com+GeForce+OR+GPU+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: AMD
+    url: "https://news.google.com/rss/search?q=site%3Aamd.com+Ryzen+OR+Radeon+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Intel
+    url: "https://news.google.com/rss/search?q=site%3Aintel.com+processor+OR+graphics+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+
+  # Memory, SSDs, HDDs and storage controllers
+  - name: Kingston / Kingston FURY
+    url: "https://news.google.com/rss/search?q=site%3Akingston.com+Kingston+FURY+OR+SSD+OR+DDR5+OR+memory+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Crucial
+    url: "https://news.google.com/rss/search?q=site%3Acrucial.com+Crucial+SSD+OR+DDR5+OR+memory+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: G.SKILL
+    url: "https://news.google.com/rss/search?q=site%3Agskill.com+G.SKILL+DDR5+OR+memory+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: TEAMGROUP / T-FORCE
+    url: "https://news.google.com/rss/search?q=site%3Ateamgroupinc.com+TEAMGROUP+OR+T-FORCE+SSD+OR+DDR5+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: ADATA
+    url: "https://news.google.com/rss/search?q=site%3Aadata.com+ADATA+SSD+OR+DDR5+OR+memory+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: XPG
+    url: "https://news.google.com/rss/search?q=site%3Axpg.com+XPG+SSD+OR+DDR5+OR+memory+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Lexar
+    url: "https://news.google.com/rss/search?q=site%3Alexar.com+Lexar+SSD+OR+DDR5+OR+memory+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Patriot / Viper
+    url: "https://news.google.com/rss/search?q=site%3Apatriotmemory.com+Patriot+OR+Viper+SSD+OR+DDR5+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: KLEVV
+    url: "https://news.google.com/rss/search?q=site%3Aklevv.com+KLEVV+SSD+OR+DDR5+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: PNY
+    url: "https://news.google.com/rss/search?q=site%3Apny.com+PNY+SSD+OR+memory+OR+graphics+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Silicon Power
+    url: "https://news.google.com/rss/search?q=site%3Asilicon-power.com+SSD+OR+DDR5+OR+memory+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Sabrent
+    url: "https://news.google.com/rss/search?q=site%3Asabrent.com+Sabrent+SSD+OR+storage+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Transcend
+    url: "https://news.google.com/rss/search?q=site%3Atranscend-info.com+Transcend+SSD+OR+memory+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Solidigm
+    url: "https://news.google.com/rss/search?q=site%3Asolidigm.com+Solidigm+SSD+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: SK hynix
+    url: "https://news.google.com/rss/search?q=site%3Anews.skhynix.com+SSD+OR+NAND+OR+DRAM+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Western Digital
+    url: "https://news.google.com/rss/search?q=site%3Awesterndigital.com+Western+Digital+SSD+OR+hard+drive+OR+storage+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: SanDisk
+    url: "https://news.google.com/rss/search?q=site%3Asandisk.com+SanDisk+SSD+OR+storage+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Seagate
+    url: "https://news.google.com/rss/search?q=site%3Aseagate.com+Seagate+hard+drive+OR+SSD+OR+storage+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: KIOXIA
+    url: "https://news.google.com/rss/search?q=site%3Akioxia.com+KIOXIA+SSD+OR+NAND+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Micron
+    url: "https://news.google.com/rss/search?q=site%3Amicron.com+Micron+SSD+OR+NAND+OR+DRAM+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: BIWIN
+    url: "https://news.google.com/rss/search?q=site%3Abiwintech.com+BIWIN+SSD+OR+DDR5+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Phison
+    url: "https://news.google.com/rss/search?q=site%3Aphison.com+Phison+SSD+OR+controller+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+
+  # Cases, power supplies and cooling
+  - name: Corsair
+    url: "https://news.google.com/rss/search?q=site%3Acorsair.com+Corsair+memory+OR+SSD+OR+case+OR+cooler+OR+PSU+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Cooler Master
+    url: "https://news.google.com/rss/search?q=site%3Acoolermaster.com+Cooler+Master+case+OR+cooler+OR+PSU+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Thermaltake
+    url: "https://news.google.com/rss/search?q=site%3Athermaltake.com+Thermaltake+case+OR+cooler+OR+PSU+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Noctua
+    url: "https://news.google.com/rss/search?q=site%3Anoctua.at+Noctua+cooler+OR+fan+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: be quiet!
+    url: "https://news.google.com/rss/search?q=site%3Abequiet.com+be+quiet+case+OR+cooler+OR+PSU+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: ARCTIC
+    url: "https://news.google.com/rss/search?q=site%3Aarctic.de+ARCTIC+cooler+OR+fan+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Lian Li
+    url: "https://news.google.com/rss/search?q=site%3Alian-li.com+Lian+Li+case+OR+cooler+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Fractal Design
+    url: "https://news.google.com/rss/search?q=site%3Afractal-design.com+Fractal+Design+case+OR+cooler+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: NZXT
+    url: "https://news.google.com/rss/search?q=site%3Anzxt.com+NZXT+case+OR+cooler+OR+PSU+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Seasonic
+    url: "https://news.google.com/rss/search?q=site%3Aseasonic.com+Seasonic+power+supply+OR+PSU+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: DeepCool
+    url: "https://news.google.com/rss/search?q=site%3Adeepcool.com+DeepCool+case+OR+cooler+OR+PSU+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Phanteks
+    url: "https://news.google.com/rss/search?q=site%3Aphanteks.com+Phanteks+case+OR+cooler+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: SilverStone
+    url: "https://news.google.com/rss/search?q=site%3Asilverstonetek.com+SilverStone+case+OR+cooler+OR+PSU+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+
+  # Monitors
   - name: LG
-    url: "https://news.google.com/rss/search?q=site%3Algnewsroom.com+monitor+OR+display+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Algnewsroom.com+monitor+OR+display+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: Samsung
-    url: "https://news.google.com/rss/search?q=site%3Anews.samsung.com+monitor+OR+display+OR+SSD+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Anews.samsung.com+monitor+OR+display+OR+SSD+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: BenQ
-    url: "https://news.google.com/rss/search?q=site%3Abenq.com+monitor+OR+display+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Abenq.com+monitor+OR+display+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: ViewSonic
-    url: "https://news.google.com/rss/search?q=site%3Aviewsonic.com+monitor+OR+display+when%3A30d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Aviewsonic.com+monitor+OR+display+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: AOC / AGON
+    url: "https://news.google.com/rss/search?q=site%3Aagonbyaoc.com+AOC+OR+AGON+monitor+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+
+  # Peripherals and creator hardware
+  - name: Logitech G
+    url: "https://news.google.com/rss/search?q=site%3Alogitechg.com+Logitech+G+keyboard+OR+mouse+OR+headset+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Razer
+    url: "https://news.google.com/rss/search?q=site%3Arazer.com+Razer+keyboard+OR+mouse+OR+headset+OR+laptop+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: SteelSeries
+    url: "https://news.google.com/rss/search?q=site%3Asteelseries.com+SteelSeries+keyboard+OR+mouse+OR+headset+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: HyperX
+    url: "https://news.google.com/rss/search?q=site%3Ahyperx.com+HyperX+keyboard+OR+mouse+OR+headset+OR+microphone+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Elgato
+    url: "https://news.google.com/rss/search?q=site%3Aelgato.com+Elgato+microphone+OR+capture+card+OR+webcam+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Turtle Beach
+    url: "https://news.google.com/rss/search?q=site%3Aturtlebeach.com+Turtle+Beach+headset+OR+controller+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
