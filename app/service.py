@@ -1,3 +1,4 @@
+from collections import Counter
 from datetime import datetime, timezone
 
 from app.ai import GeminiEditor
@@ -71,6 +72,21 @@ class NewsFlowService:
                 reverse=True,
             )
 
+            eligible_by_source = Counter(
+                article.source for article in articles if self._filter.accepts(article)
+            )
+            logger.info(
+                "Локально подходящих материалов до проверки дублей: {}. Источники: {}",
+                sum(eligible_by_source.values()),
+                ", ".join(
+                    f"{source}={count}"
+                    for source, count in eligible_by_source.most_common(25)
+                ) or "нет",
+            )
+
+            articles = articles[: settings.max_candidates]
+            logger.info("После ранжирования проверяем до {} кандидатов", len(articles))
+
             for article in articles:
                 if published >= settings.max_articles_per_run:
                     break
@@ -102,8 +118,6 @@ class NewsFlowService:
                     logger.warning("Страница не загружена {}: {}", original_url, exc)
                     continue
 
-                # The same launch can enter through several Google News searches and
-                # slightly different URLs. Check again after resolving the real page.
                 if self._database.is_duplicate(article):
                     counters["duplicates"] += 1
                     self._database.save(article, "duplicate", aliases=(original_url,))
