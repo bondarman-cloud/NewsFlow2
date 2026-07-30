@@ -16,6 +16,7 @@ jobs:
       force_publish: true
       database_path: data/newsflow2.db
       cache_prefix: hardware-news-db-v1
+      legacy_cache_prefix: newsflow2-db-v6
     secrets:
       bot_token: ${{ secrets.BOT_TOKEN }}
       channel_id: ${{ secrets.CHANNEL_ID }}
