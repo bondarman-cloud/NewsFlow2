@@ -18,6 +18,9 @@ on:
       cache_prefix:
         required: true
         type: string
+      legacy_cache_prefix:
+        required: true
+        type: string
     secrets:
       bot_token:
         required: true
@@ -70,10 +73,7 @@ jobs:
           key: ${{ inputs.cache_prefix }}-${{ github.run_id }}
           restore-keys: |
             ${{ inputs.cache_prefix }}-
-            newsflow2-db-v6-
-            newsflow2-db-v5-
-            newsflow2-db-v4-
-            newsflow2-db-v2-
+            ${{ inputs.legacy_cache_prefix }}-
 
       - name: Install project
         run: |
