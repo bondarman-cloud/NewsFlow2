@@ -1,0 +1,84 @@
+sources:
+  - name: OpenAI
+    type: rss
+    url: https://openai.com/news/rss.xml
+
+  - name: Google AI
+    type: rss
+    url: https://blog.google/technology/ai/rss/
+
+  - name: Google DeepMind
+    type: rss
+    url: https://deepmind.google/discover/blog/rss.xml
+
+  - name: Anthropic
+    type: rss
+    url: https://www.anthropic.com/news/rss.xml
+
+  - name: GitHub Blog
+    type: rss
+    url: https://github.blog/feed/
+
+  - name: Microsoft
+    type: rss
+    url: https://blogs.microsoft.com/feed/
+
+  - name: Microsoft Security
+    type: rss
+    url: https://www.microsoft.com/en-us/security/blog/feed/
+
+  - name: NVIDIA
+    type: rss
+    url: https://blogs.nvidia.com/feed/
+
+  - name: Cloudflare
+    type: rss
+    url: https://blog.cloudflare.com/rss/
+
+  - name: Docker
+    type: rss
+    url: https://www.docker.com/blog/feed/
+
+  - name: JetBrains
+    type: rss
+    url: https://blog.jetbrains.com/feed/
+
+  - name: Python
+    type: rss
+    url: https://pyfound.blogspot.com/feeds/posts/default
+
+  - name: PostgreSQL
+    type: rss
+    url: https://www.postgresql.org/news.rss
+
+  - name: Linux Foundation
+    type: rss
+    url: https://www.linuxfoundation.org/blog/rss.xml
+
+  - name: Android Developers
+    type: rss
+    url: https://android-developers.googleblog.com/feeds/posts/default
+
+  - name: Chrome Developers
+    type: rss
+    url: https://developer.chrome.com/blog/rss.xml
+
+  - name: Hugging Face
+    type: rss
+    url: https://huggingface.co/blog/feed.xml
+
+  - name: Vercel
+    type: rss
+    url: https://vercel.com/blog/rss.xml
+
+  - name: AWS
+    type: rss
+    url: https://aws.amazon.com/blogs/aws/feed/
+
+  - name: Azure
+    type: rss
+    url: https://azure.microsoft.com/en-us/blog/feed/
+
+  - name: Meta AI
+    type: rss
+    url: https://ai.meta.com/blog/rss/

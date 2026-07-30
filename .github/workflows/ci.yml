@@ -1,8 +1,10 @@
-name: Validate NewsFlow2
+name: Validate Bot Platform
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - "feature/**"
   pull_request:
     branches: [main]
 
@@ -13,6 +15,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      BOT_ID: hardware_news
+      BOT_TOKEN: test-token
+      CHANNEL_ID: "-1000000000000"
+      GEMINI_API_KEY: test-key
 
     steps:
       - name: Checkout repository
@@ -27,10 +34,25 @@ jobs:
       - name: Install project
         run: |
           python -m pip install --upgrade pip
-          pip install .[dev]
+          pip install ".[dev]"
 
       - name: Compile
         run: python -m compileall -q app main.py
 
+      - name: Lint
+        run: ruff check app tests main.py
+
       - name: Test
         run: pytest -q
+
+      - name: Validate bot profiles
+        run: |
+          python - <<'PY'
+          from app.config import load_bot_profile
+
+          for bot_id in ("hardware_news", "tech_news"):
+              profile = load_bot_profile(bot_id)
+              assert profile.sources_path.is_file()
+              assert profile.prompt_path.is_file()
+              print(bot_id, profile.title)
+          PY

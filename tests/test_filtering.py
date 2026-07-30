@@ -1,4 +1,4 @@
-from app.filtering import HardwareNewsFilter
+from app.filtering import HardwareNewsFilter, TechNewsFilter, build_filter
 from app.models import Article
 
 
@@ -63,3 +63,27 @@ def test_rejects_memory_award() -> None:
         url="https://example.com/award",
     )
     assert not HardwareNewsFilter().accepts(article)
+
+
+def test_tech_filter_accepts_release() -> None:
+    article = Article(
+        source="GitHub Blog",
+        title="GitHub releases a new security API for developers",
+        url="https://example.com/api",
+    )
+    assert TechNewsFilter().accepts(article)
+    assert TechNewsFilter().priority(article) > 0
+
+
+def test_tech_filter_rejects_webinar() -> None:
+    article = Article(
+        source="Cloudflare",
+        title="Join our webinar about cloud security",
+        url="https://example.com/webinar",
+    )
+    assert not TechNewsFilter().accepts(article)
+
+
+def test_filter_factory() -> None:
+    assert isinstance(build_filter("hardware"), HardwareNewsFilter)
+    assert isinstance(build_filter("tech"), TechNewsFilter)

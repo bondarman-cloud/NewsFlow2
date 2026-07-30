@@ -1,0 +1,16 @@
+id: tech_news
+title: Tech News Flow
+filter: tech
+base_tag: технологии
+sources: bots/tech_news/sources.yaml
+prompt: bots/tech_news/prompt.txt
+require_image: false
+query_exclusions: ""
+
+defaults:
+  max_articles_per_run: 1
+  max_candidates: 500
+  max_age_hours: 336
+  publish_interval: 3300
+
+discovery_queries: []

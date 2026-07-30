@@ -1,0 +1,26 @@
+name: Scheduled Technology News
+run-name: Technology News automatic
+
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.ENABLE_TECH_NEWS == 'true' }}
+    uses: ./.github/workflows/run-bot.yml
+    with:
+      bot_id: tech_news
+      run_mode: scheduled
+      force_publish: false
+      database_path: data/tech_news.db
+      cache_prefix: tech-news-db-v1
+      legacy_cache_prefix: tech-news-db-v1
+    secrets:
+      bot_token: ${{ secrets.TECH_BOT_TOKEN }}
+      channel_id: ${{ secrets.TECH_CHANNEL_ID }}
+      gemini_api_key: ${{ secrets.GEMINI_API_KEY }}

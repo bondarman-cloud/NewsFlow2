@@ -1,13 +1,43 @@
+import argparse
 import asyncio
+import os
 
-from app.service import NewsFlowService
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run one bot from the shared platform")
+    parser.add_argument(
+        "--bot",
+        default=os.getenv("BOT_ID", "hardware_news"),
+        help="Bot profile ID from bots/<id>/config.yaml",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=("manual", "scheduled"),
+        default=os.getenv("RUN_MODE", "scheduled"),
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Ignore the scheduled publication interval",
+    )
+    return parser.parse_args()
 
 
-async def main() -> None:
+async def run() -> None:
+    args = parse_args()
+    os.environ["BOT_ID"] = args.bot
+    os.environ["RUN_MODE"] = args.mode
+    if args.force:
+        os.environ["FORCE_PUBLISH"] = "true"
+
+    # Import after selecting the profile. Settings are intentionally loaded once.
+    from app.config import settings
+    from app.service import NewsFlowService
+
     service = NewsFlowService()
     published = await service.run()
-    print(f"NewsFlow2: опубликовано статей: {published}")
+    print(f"{settings.bot_id}: опубликовано статей: {published}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(run())

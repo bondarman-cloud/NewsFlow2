@@ -20,66 +20,17 @@ class SourceManager:
         "AppleWebKit/537.36 Chrome/131.0 Safari/537.36"
     )
 
-    LAPTOP_EXCLUSIONS = "-laptop -notebook -chromebook -ultrabook"
-
-    DISCOVERY_QUERIES = (
-        (
-            "Desktop hardware launches",
-            '(announces OR launches OR unveils OR introduces OR releases OR "now available") '
-            '("graphics card" OR GPU OR processor OR motherboard OR desktop OR "mini PC" '
-            'OR workstation) when:30d',
-        ),
-        (
-            "Memory and storage launches",
-            '(announces OR launches OR unveils OR introduces OR releases OR available OR debuts) '
-            '(DDR5 OR DDR6 OR "memory kit" OR DRAM OR SSD OR NVMe OR "external SSD" '
-            'OR "hard drive" OR HDD OR NAND) when:30d',
-        ),
-        (
-            "Monitor launches",
-            '(announces OR launches OR unveils OR introduces OR releases OR available) '
-            '("gaming monitor" OR OLED OR QD-OLED OR Mini-LED OR display) when:30d',
-        ),
-        (
-            "Cases cooling and PSUs",
-            '(announces OR launches OR unveils OR introduces OR releases OR available) '
-            '("PC case" OR chassis OR "power supply" OR PSU OR "CPU cooler" '
-            'OR "liquid cooler" OR fan) when:30d',
-        ),
-        (
-            "PC peripherals launches",
-            '(announces OR launches OR unveils OR introduces OR releases OR available) '
-            '(keyboard OR mouse OR headset OR microphone OR webcam OR "capture card" '
-            'OR controller OR router) when:30d',
-        ),
-        (
-            "TechPowerUp desktop hardware",
-            'site:techpowerup.com (SSD OR DDR5 OR GPU OR motherboard OR monitor OR cooler '
-            'OR keyboard OR mouse OR desktop OR "mini PC") when:30d',
-        ),
-        (
-            "Tom's Hardware desktop launches",
-            'site:tomshardware.com (launches OR announces OR unveils OR releases OR available) '
-            '(SSD OR DDR5 OR GPU OR CPU OR motherboard OR monitor OR desktop OR "mini PC") '
-            'when:30d',
-        ),
-        (
-            "VideoCardz desktop launches",
-            'site:videocardz.com (launches OR announces OR unveils OR releases OR available) '
-            '(GPU OR CPU OR motherboard OR memory OR SSD OR monitor OR desktop OR "mini PC") '
-            'when:30d',
-        ),
-    )
-
     def __init__(self) -> None:
         data = yaml.safe_load(settings.sources_path.read_text(encoding="utf-8")) or {}
         configured: list[dict[str, str]] = data.get("sources", [])
         discovery = [
             {
-                "name": name,
-                "url": self._google_news_url(f"{query} {self.LAPTOP_EXCLUSIONS}"),
+                "name": item["name"],
+                "url": self._google_news_url(
+                    f"{item['query']} {settings.query_exclusions}".strip()
+                ),
             }
-            for name, query in self.DISCOVERY_QUERIES
+            for item in settings.discovery_queries
         ]
         self._sources = [*configured, *discovery]
         self._semaphore = asyncio.Semaphore(10)
@@ -131,7 +82,8 @@ class SourceManager:
             reverse=True,
         )
         logger.info(
-            "RSS: настроено источников={}, доступно={}, найдено={}, свежих уникальных={}",
+            "RSS [{}]: настроено источников={}, доступно={}, найдено={}, свежих уникальных={}",
+            settings.bot_id,
             len(self._sources),
             available_sources,
             len(articles),

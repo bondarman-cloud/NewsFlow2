@@ -1,0 +1,102 @@
+name: Reusable bot runner
+
+on:
+  workflow_call:
+    inputs:
+      bot_id:
+        required: true
+        type: string
+      run_mode:
+        required: true
+        type: string
+      force_publish:
+        required: true
+        type: boolean
+      database_path:
+        required: true
+        type: string
+      cache_prefix:
+        required: true
+        type: string
+      legacy_cache_prefix:
+        required: true
+        type: string
+    secrets:
+      bot_token:
+        required: true
+      channel_id:
+        required: true
+      gemini_api_key:
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ inputs.bot_id }}-production
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      BOT_ID: ${{ inputs.bot_id }}
+      BOT_TOKEN: ${{ secrets.bot_token }}
+      CHANNEL_ID: ${{ secrets.channel_id }}
+      GEMINI_API_KEY: ${{ secrets.gemini_api_key }}
+      DATABASE_PATH: ${{ inputs.database_path }}
+      IMAGE_CACHE_DIR: cache/images/${{ inputs.bot_id }}
+      FORCE_PUBLISH: ${{ inputs.force_publish }}
+      RUN_MODE: ${{ inputs.run_mode }}
+      LOG_LEVEL: INFO
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Prepare runtime
+        run: |
+          mkdir -p "$(dirname "$DATABASE_PATH")" "$IMAGE_CACHE_DIR"
+
+      - name: Restore publication database
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.database_path }}
+          key: ${{ inputs.cache_prefix }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ inputs.cache_prefix }}-
+            ${{ inputs.legacy_cache_prefix }}-
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+
+      - name: Validate profile and secrets
+        run: |
+          python - <<'PY'
+          import os
+          from app.config import settings
+
+          missing = [
+              name
+              for name in ("BOT_TOKEN", "CHANNEL_ID", "GEMINI_API_KEY")
+              if not os.getenv(name)
+          ]
+          if missing:
+              raise SystemExit("Missing GitHub secrets: " + ", ".join(missing))
+          print(f"Profile: {settings.bot_id} ({settings.title})")
+          print(f"Sources: {settings.sources_path}")
+          print(f"Database: {settings.database_path}")
+          PY
+
+      - name: Publish one article
+        run: python main.py --bot "$BOT_ID" --mode "$RUN_MODE"
