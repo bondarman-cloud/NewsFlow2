@@ -11,7 +11,7 @@ from app.models import Article
 
 class PublicationDatabase:
     DUPLICATE_TITLE_THRESHOLD = 0.90
-    PIPELINE_VERSION = 4
+    PIPELINE_VERSION = 5
 
     def __init__(self, path: Path) -> None:
         self._path = path
@@ -37,7 +37,8 @@ class PublicationDatabase:
                     title TEXT NOT NULL,
                     article_published_at TEXT,
                     created_at TEXT NOT NULL,
-                    pipeline_version INTEGER NOT NULL DEFAULT 0
+                    pipeline_version INTEGER NOT NULL DEFAULT 0,
+                    publication_mode TEXT
                 )
                 """
             )
@@ -54,6 +55,10 @@ class PublicationDatabase:
                 connection.execute(
                     "ALTER TABLE processed_articles "
                     "ADD COLUMN pipeline_version INTEGER NOT NULL DEFAULT 0"
+                )
+            if "publication_mode" not in columns:
+                connection.execute(
+                    "ALTER TABLE processed_articles ADD COLUMN publication_mode TEXT"
                 )
 
             rows = connection.execute(
@@ -81,6 +86,10 @@ class PublicationDatabase:
             connection.execute(
                 "CREATE INDEX IF NOT EXISTS idx_processed_pipeline_version "
                 "ON processed_articles(pipeline_version, status)"
+            )
+            connection.execute(
+                "CREATE INDEX IF NOT EXISTS idx_publication_mode_time "
+                "ON processed_articles(publication_mode, status, created_at)"
             )
             connection.commit()
 
@@ -179,11 +188,13 @@ class PublicationDatabase:
         article: Article,
         status: str,
         aliases: tuple[str, ...] = (),
+        publication_mode: str | None = None,
     ) -> None:
         urls = tuple(dict.fromkeys((article.url, *aliases)))
         now = datetime.now(timezone.utc).isoformat()
         article_time = article.published_at.isoformat() if article.published_at else None
         key = self.title_key(article.title)
+        mode = publication_mode if status == "published" else None
 
         with self._connect() as connection:
             for url in urls:
@@ -191,8 +202,9 @@ class PublicationDatabase:
                     """
                     INSERT INTO processed_articles
                         (url, canonical_url, title_key, status, source, title,
-                         article_published_at, created_at, pipeline_version)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                         article_published_at, created_at, pipeline_version,
+                         publication_mode)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT(url) DO UPDATE SET
                         canonical_url = excluded.canonical_url,
                         title_key = excluded.title_key,
@@ -214,7 +226,13 @@ class PublicationDatabase:
                             THEN processed_articles.created_at
                             ELSE excluded.created_at
                         END,
-                        pipeline_version = excluded.pipeline_version
+                        pipeline_version = excluded.pipeline_version,
+                        publication_mode = CASE
+                            WHEN processed_articles.status = 'published'
+                                 AND excluded.status != 'published'
+                            THEN processed_articles.publication_mode
+                            ELSE excluded.publication_mode
+                        END
                     """,
                     (
                         url,
@@ -226,21 +244,25 @@ class PublicationDatabase:
                         article_time,
                         now,
                         self.PIPELINE_VERSION,
+                        mode,
                     ),
                 )
             connection.commit()
 
-    def latest_published_at(self) -> datetime | None:
+    def latest_published_at(self, publication_mode: str | None = None) -> datetime | None:
+        query = """
+            SELECT created_at
+            FROM processed_articles
+            WHERE status = 'published'
+        """
+        params: tuple[str, ...] = ()
+        if publication_mode:
+            query += " AND publication_mode = ?"
+            params = (publication_mode,)
+        query += " ORDER BY id DESC LIMIT 1"
+
         with self._connect() as connection:
-            row = connection.execute(
-                """
-                SELECT created_at
-                FROM processed_articles
-                WHERE status = 'published'
-                ORDER BY id DESC
-                LIMIT 1
-                """
-            ).fetchone()
+            row = connection.execute(query, params).fetchone()
         if row is None:
             return None
         value = datetime.fromisoformat(row["created_at"])
