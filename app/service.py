@@ -5,7 +5,7 @@ from app.ai import GeminiEditor
 from app.article_loader import ArticleLoader
 from app.config import settings
 from app.database import PublicationDatabase
-from app.filtering import HardwareNewsFilter
+from app.filtering import build_filter
 from app.formatter import PostFormatter
 from app.images import ImageService
 from app.logger import logger
@@ -21,7 +21,7 @@ class NewsFlowService:
     def __init__(self) -> None:
         self._database = PublicationDatabase(settings.database_path)
         self._sources = SourceManager()
-        self._filter = HardwareNewsFilter()
+        self._filter = build_filter(settings.filter_type)
         self._loader = ArticleLoader()
         self._images = ImageService()
         self._editor = GeminiEditor()
@@ -30,7 +30,10 @@ class NewsFlowService:
 
     def _interval_has_elapsed(self) -> bool:
         if settings.force_publish:
-            logger.info("Ручной запуск: интервал автоматических публикаций не учитывается")
+            logger.info(
+                "Ручной запуск [{}]: интервал автоматических публикаций не учитывается",
+                settings.bot_id,
+            )
             return True
 
         latest = self._database.latest_published_at(publication_mode="scheduled")
@@ -43,7 +46,8 @@ class NewsFlowService:
             return True
 
         logger.info(
-            "До следующей автоматической публикации осталось примерно {} мин.",
+            "До следующей автоматической публикации [{}] осталось примерно {} мин.",
+            settings.bot_id,
             max(1, int((remaining + 59) // 60)),
         )
         return False
@@ -69,9 +73,7 @@ class NewsFlowService:
 
         published = 0
         counters = {
-            "already_processed": 0,
             "duplicates": 0,
-            "filtered": 0,
             "load_errors": 0,
             "no_image": 0,
             "ai_rejected": 0,
@@ -79,6 +81,12 @@ class NewsFlowService:
         }
 
         try:
+            logger.info(
+                "Запуск бота {} ({}) в режиме {}",
+                settings.bot_id,
+                settings.title,
+                settings.run_mode,
+            )
             articles = await self._sources.fetch()
             articles.sort(
                 key=lambda item: (
@@ -91,7 +99,8 @@ class NewsFlowService:
             eligible = [article for article in articles if self._filter.accepts(article)]
             eligible_by_source = Counter(article.source for article in eligible)
             logger.info(
-                "Локально подходящих материалов до проверки дублей: {}. Источники: {}",
+                "Локально подходящих материалов [{}]: {}. Источники: {}",
+                settings.bot_id,
                 len(eligible),
                 ", ".join(
                     f"{source}={count}"
@@ -138,7 +147,7 @@ class NewsFlowService:
                     continue
 
                 article.image_path = await self._images.download(article.image_url, article.url)
-                if article.image_path is None:
+                if article.image_path is None and settings.require_image:
                     counters["no_image"] += 1
                     self._database.save(article, "no_image", aliases=(original_url,))
                     continue
@@ -168,15 +177,19 @@ class NewsFlowService:
                     publication_mode=settings.run_mode,
                 )
                 published += 1
-                logger.info("Опубликовано [{}]: {}", settings.run_mode, article.url)
+                logger.info(
+                    "Опубликовано [{}:{}]: {}",
+                    settings.bot_id,
+                    settings.run_mode,
+                    article.url,
+                )
 
             logger.info(
-                "Итог: опубликовано={}, обработано ранее={}, дубли={}, локальный фильтр={}, "
-                "ошибки загрузки={}, без картинки={}, AI-проверок={}, отклонено AI={}",
+                "Итог [{}]: опубликовано={}, дубли={}, ошибки загрузки={}, "
+                "без картинки={}, AI-проверок={}, отклонено AI={}",
+                settings.bot_id,
                 published,
-                counters["already_processed"],
                 counters["duplicates"],
-                counters["filtered"],
                 counters["load_errors"],
                 counters["no_image"],
                 counters["ai_attempts"],
