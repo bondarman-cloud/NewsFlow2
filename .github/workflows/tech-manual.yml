@@ -16,6 +16,7 @@ jobs:
       force_publish: true
       database_path: data/tech_news.db
       cache_prefix: tech-news-db-v1
+      legacy_cache_prefix: tech-news-db-v1
     secrets:
       bot_token: ${{ secrets.TECH_BOT_TOKEN }}
       channel_id: ${{ secrets.TECH_CHANNEL_ID }}
