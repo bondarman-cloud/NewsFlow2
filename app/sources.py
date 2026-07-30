@@ -22,7 +22,7 @@ class SourceManager:
     def __init__(self) -> None:
         data = yaml.safe_load(settings.sources_path.read_text(encoding="utf-8")) or {}
         self._sources: list[dict[str, str]] = data.get("sources", [])
-        self._semaphore = asyncio.Semaphore(8)
+        self._semaphore = asyncio.Semaphore(10)
 
     async def fetch(self) -> list[Article]:
         async with httpx.AsyncClient(
@@ -36,10 +36,12 @@ class SourceManager:
             )
 
         articles: list[Article] = []
+        available_sources = 0
         for source, result in zip(self._sources, groups, strict=True):
             if isinstance(result, Exception):
                 logger.warning("Источник {} недоступен: {}", source.get("name"), result)
                 continue
+            available_sources += 1
             articles.extend(result)
 
         unique: dict[str, Article] = {}
@@ -57,12 +59,16 @@ class SourceManager:
             reverse=True,
         )
         logger.info(
-            "RSS: источников={}, найдено={}, свежих уникальных={}",
+            "RSS: настроено источников={}, доступно={}, найдено={}, свежих уникальных={}",
             len(self._sources),
+            available_sources,
             len(articles),
             len(fresh),
         )
-        return fresh[: settings.max_candidates]
+
+        # Do not truncate here. The service must first rank all manufacturers by
+        # relevance, otherwise very active laptop brands crowd out memory and storage.
+        return fresh
 
     async def _fetch_source(
         self,
