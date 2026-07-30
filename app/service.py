@@ -27,10 +27,10 @@ class NewsFlowService:
 
     def _interval_has_elapsed(self) -> bool:
         if settings.force_publish:
-            logger.info("Ручной запуск: часовой интервал отключён")
+            logger.info("Ручной запуск: интервал автоматических публикаций не учитывается")
             return True
 
-        latest = self._database.latest_published_at()
+        latest = self._database.latest_published_at(publication_mode="scheduled")
         if latest is None:
             return True
 
@@ -40,7 +40,7 @@ class NewsFlowService:
             return True
 
         logger.info(
-            "До следующей публикации осталось примерно {} мин.",
+            "До следующей автоматической публикации осталось примерно {} мин.",
             max(1, int((remaining + 59) // 60)),
         )
         return False
@@ -133,9 +133,14 @@ class NewsFlowService:
                     logger.exception("Telegram-публикация не удалась: {}", exc)
                     raise RuntimeError(f"Telegram publication failed: {exc}") from exc
 
-                self._database.save(article, "published", aliases=(original_url,))
+                self._database.save(
+                    article,
+                    "published",
+                    aliases=(original_url,),
+                    publication_mode=settings.run_mode,
+                )
                 published += 1
-                logger.info("Опубликовано: {}", article.url)
+                logger.info("Опубликовано [{}]: {}", settings.run_mode, article.url)
 
             logger.info(
                 "Итог: опубликовано={}, обработано ранее={}, дубли={}, локальный фильтр={}, "
