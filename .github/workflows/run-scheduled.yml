@@ -3,8 +3,10 @@ run-name: NewsFlow2 automatic
 
 on:
   schedule:
-    # GitHub cron uses UTC. The minute value is the same in Uruguay.
-    - cron: "19 * * * *"
+    # Two attempts per hour. The application itself enforces a 55-minute
+    # publication interval, so this improves reliability without doubling posts.
+    - cron: "19,49 * * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,7 +18,7 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
@@ -26,7 +28,7 @@ jobs:
       MAX_ARTICLES_PER_RUN: 1
       MAX_CANDIDATES: 500
       MAX_AGE_HOURS: 336
-      # 55 minutes tolerates a small scheduler delay without skipping a full slot.
+      # At most one successful publication per 55 minutes.
       PUBLISH_INTERVAL: 3300
       FORCE_PUBLISH: false
       LOG_LEVEL: INFO
@@ -48,14 +50,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/newsflow2.db
-          key: newsflow2-db-v2-${{ github.run_id }}
+          key: newsflow2-db-v4-${{ github.run_id }}
           restore-keys: |
+            newsflow2-db-v4-
             newsflow2-db-v2-
 
       - name: Show trigger
         run: |
           echo "Trigger: ${{ github.event_name }}"
           echo "Schedule: ${{ github.event.schedule }}"
+          echo "Commit: ${{ github.sha }}"
 
       - name: Install project
         run: |
