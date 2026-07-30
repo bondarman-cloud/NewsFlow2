@@ -9,12 +9,14 @@ from app.filtering import HardwareNewsFilter
 from app.formatter import PostFormatter
 from app.images import ImageService
 from app.logger import logger
+from app.models import Article
 from app.sources import SourceManager
 from app.telegram import TelegramPublisher
 
 
 class NewsFlowService:
-    MAX_AI_ATTEMPTS = 20
+    MAX_AI_ATTEMPTS = 30
+    MAX_CANDIDATES_PER_SOURCE = 3
 
     def __init__(self) -> None:
         self._database = PublicationDatabase(settings.database_path)
@@ -46,6 +48,20 @@ class NewsFlowService:
         )
         return False
 
+    def _diversify(self, articles: list[Article]) -> list[Article]:
+        selected: list[Article] = []
+        source_counts: Counter[str] = Counter()
+
+        for article in articles:
+            if source_counts[article.source] >= self.MAX_CANDIDATES_PER_SOURCE:
+                continue
+            selected.append(article)
+            source_counts[article.source] += 1
+            if len(selected) >= settings.max_candidates:
+                break
+
+        return selected
+
     async def run(self) -> int:
         if not self._interval_has_elapsed():
             await self._telegram.close()
@@ -72,20 +88,23 @@ class NewsFlowService:
                 reverse=True,
             )
 
-            eligible_by_source = Counter(
-                article.source for article in articles if self._filter.accepts(article)
-            )
+            eligible = [article for article in articles if self._filter.accepts(article)]
+            eligible_by_source = Counter(article.source for article in eligible)
             logger.info(
                 "Локально подходящих материалов до проверки дублей: {}. Источники: {}",
-                sum(eligible_by_source.values()),
+                len(eligible),
                 ", ".join(
                     f"{source}={count}"
-                    for source, count in eligible_by_source.most_common(25)
+                    for source, count in eligible_by_source.most_common(40)
                 ) or "нет",
             )
 
-            articles = articles[: settings.max_candidates]
-            logger.info("После ранжирования проверяем до {} кандидатов", len(articles))
+            articles = self._diversify(eligible)
+            logger.info(
+                "После ранжирования и ограничения по {} материала на источник проверяем {} кандидатов",
+                self.MAX_CANDIDATES_PER_SOURCE,
+                len(articles),
+            )
 
             for article in articles:
                 if published >= settings.max_articles_per_run:
@@ -98,11 +117,6 @@ class NewsFlowService:
                 if self._database.is_duplicate(article):
                     counters["duplicates"] += 1
                     self._database.save(article, "duplicate", aliases=(original_url,))
-                    continue
-
-                if not self._filter.accepts(article):
-                    counters["filtered"] += 1
-                    self._database.save(article, "filtered", aliases=(original_url,))
                     continue
 
                 logger.info(
