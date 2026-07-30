@@ -3,7 +3,9 @@ run-name: Technology News automatic
 
 on:
   schedule:
-    - cron: "7,37 * * * *"
+    # Three attempts near the start of every hour. The application interval
+    # prevents more than one successful scheduled publication per hour.
+    - cron: "6,16,26 * * * *"
   workflow_dispatch:
 
 permissions:
