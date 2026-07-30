@@ -1,6 +1,7 @@
 import html
 import re
 
+from app.config import settings
 from app.models import Article
 
 
@@ -27,7 +28,12 @@ class PostFormatter:
 
     @staticmethod
     def _format_tags(tags: list[str]) -> str:
-        normalized: list[str] = ["железо"]
+        base_tag = re.sub(
+            r"[^\wа-яА-ЯёЁ]+",
+            "_",
+            settings.base_tag.strip(),
+        ).strip("_").lower()
+        normalized: list[str] = [base_tag] if base_tag else []
         for tag in tags:
             clean = re.sub(r"[^\wа-яА-ЯёЁ]+", "_", tag.strip()).strip("_").lower()
             if clean and clean not in normalized:
