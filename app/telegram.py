@@ -16,7 +16,6 @@ class TelegramPublisher:
                 chat_id=settings.channel_id,
                 text=text,
                 parse_mode="HTML",
-                link_preview_options={"is_disabled": False},
             )
             return
 
