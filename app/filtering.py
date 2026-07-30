@@ -1,6 +1,13 @@
 import re
+from typing import Protocol
 
 from app.models import Article
+
+
+class ArticleFilter(Protocol):
+    def accepts(self, article: Article) -> bool: ...
+
+    def priority(self, article: Article) -> int: ...
 
 
 class HardwareNewsFilter:
@@ -62,10 +69,6 @@ class HardwareNewsFilter:
             return False
         if any(term in text for term in self.EXCLUDED_KEYWORDS):
             return False
-
-        # Google News summaries are often only a title plus publisher. Requiring a
-        # release verb here discarded legitimate SSD, memory and peripheral launches.
-        # Gemini performs the strict editorial decision later.
         return any(term in text for term in self.PRODUCT_KEYWORDS)
 
     def priority(self, article: Article) -> int:
@@ -95,3 +98,49 @@ class HardwareNewsFilter:
             + storage_bonus * 4
             + (3 if model_like else 0)
         )
+
+
+class TechNewsFilter:
+    EXCLUDED_KEYWORDS = {
+        "earnings", "revenue", "financial results", "stock price", "share price",
+        "sponsorship", "giveaway", "discount", "promotion", "job opening", "hiring",
+        "podcast", "webinar", "conference recap", "event recap", "weekly roundup",
+        "how to", "tutorial", "beginner guide", "customer story", "case study",
+        "award", "awards", "anniversary", "celebration",
+    }
+    PRIORITY_KEYWORDS = {
+        "announce", "announces", "announced", "launch", "launches", "launched",
+        "release", "releases", "released", "introduce", "introduces", "introduced",
+        "open source", "api", "model", "security", "vulnerability", "database",
+        "python", "linux", "github", "docker", "cloud", "browser", "developer",
+        "artificial intelligence", "machine learning", "available now", "new",
+    }
+
+    @staticmethod
+    def _normalize(value: str) -> str:
+        return re.sub(r"\s+", " ", value.lower()).strip()
+
+    def accepts(self, article: Article) -> bool:
+        text = self._normalize(f"{article.title} {article.rss_summary}")
+        return len(article.title.strip()) >= 12 and not any(
+            term in text for term in self.EXCLUDED_KEYWORDS
+        )
+
+    def priority(self, article: Article) -> int:
+        text = self._normalize(f"{article.title} {article.rss_summary}")
+        if any(term in text for term in self.EXCLUDED_KEYWORDS):
+            return -10_000
+        hits = sum(term in text for term in self.PRIORITY_KEYWORDS)
+        title_hits = sum(term in article.title.lower() for term in self.PRIORITY_KEYWORDS)
+        return hits * 4 + title_hits * 3
+
+
+def build_filter(filter_type: str) -> ArticleFilter:
+    filters: dict[str, type[HardwareNewsFilter] | type[TechNewsFilter]] = {
+        "hardware": HardwareNewsFilter,
+        "tech": TechNewsFilter,
+    }
+    try:
+        return filters[filter_type]()
+    except KeyError as exc:
+        raise ValueError(f"Неизвестный тип фильтра: {filter_type!r}") from exc
