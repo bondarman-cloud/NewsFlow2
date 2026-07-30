@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     max_age_hours: int = Field(default=336, alias="MAX_AGE_HOURS")
     publish_interval: int = Field(default=3300, alias="PUBLISH_INTERVAL")
     force_publish: bool = Field(default=False, alias="FORCE_PUBLISH")
+    run_mode: str = Field(default="scheduled", alias="RUN_MODE")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
 
 
