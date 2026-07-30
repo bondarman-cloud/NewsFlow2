@@ -20,12 +20,14 @@ class SourceManager:
         "AppleWebKit/537.36 Chrome/131.0 Safari/537.36"
     )
 
+    LAPTOP_EXCLUSIONS = "-laptop -notebook -chromebook -ultrabook"
+
     DISCOVERY_QUERIES = (
         (
-            "Hardware launches",
+            "Desktop hardware launches",
             '(announces OR launches OR unveils OR introduces OR releases OR "now available") '
-            '("graphics card" OR GPU OR processor OR motherboard OR laptop OR "mini PC") '
-            'when:30d',
+            '("graphics card" OR GPU OR processor OR motherboard OR desktop OR "mini PC" '
+            'OR workstation) when:30d',
         ),
         (
             "Memory and storage launches",
@@ -51,24 +53,21 @@ class SourceManager:
             'OR controller OR router) when:30d',
         ),
         (
-            "TechPowerUp hardware",
+            "TechPowerUp desktop hardware",
             'site:techpowerup.com (SSD OR DDR5 OR GPU OR motherboard OR monitor OR cooler '
-            'OR keyboard OR mouse OR laptop) when:30d',
+            'OR keyboard OR mouse OR desktop OR "mini PC") when:30d',
         ),
         (
-            "Tom's Hardware launches",
+            "Tom's Hardware desktop launches",
             'site:tomshardware.com (launches OR announces OR unveils OR releases OR available) '
-            '(SSD OR DDR5 OR GPU OR CPU OR motherboard OR monitor OR laptop) when:30d',
+            '(SSD OR DDR5 OR GPU OR CPU OR motherboard OR monitor OR desktop OR "mini PC") '
+            'when:30d',
         ),
         (
-            "VideoCardz launches",
+            "VideoCardz desktop launches",
             'site:videocardz.com (launches OR announces OR unveils OR releases OR available) '
-            '(GPU OR CPU OR motherboard OR memory OR SSD OR monitor OR laptop) when:30d',
-        ),
-        (
-            "Notebookcheck launches",
-            'site:notebookcheck.net (launches OR announces OR unveils OR releases OR available) '
-            '(laptop OR "mini PC" OR monitor OR SSD OR GPU OR processor) when:30d',
+            '(GPU OR CPU OR motherboard OR memory OR SSD OR monitor OR desktop OR "mini PC") '
+            'when:30d',
         ),
     )
 
@@ -76,7 +75,10 @@ class SourceManager:
         data = yaml.safe_load(settings.sources_path.read_text(encoding="utf-8")) or {}
         configured: list[dict[str, str]] = data.get("sources", [])
         discovery = [
-            {"name": name, "url": self._google_news_url(query)}
+            {
+                "name": name,
+                "url": self._google_news_url(f"{query} {self.LAPTOP_EXCLUSIONS}"),
+            }
             for name, query in self.DISCOVERY_QUERIES
         ]
         self._sources = [*configured, *discovery]
