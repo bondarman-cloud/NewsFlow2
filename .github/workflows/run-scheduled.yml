@@ -3,8 +3,8 @@ run-name: NewsFlow2 automatic
 
 on:
   schedule:
-    # Two attempts per hour. The application itself enforces a 55-minute
-    # publication interval, so this improves reliability without doubling posts.
+    # Two attempts per hour. Only scheduled publications count toward the
+    # 55-minute automatic interval; manual posts do not delay this workflow.
     - cron: "19,49 * * * *"
   workflow_dispatch:
 
@@ -28,9 +28,9 @@ jobs:
       MAX_ARTICLES_PER_RUN: 1
       MAX_CANDIDATES: 500
       MAX_AGE_HOURS: 336
-      # At most one successful publication per 55 minutes.
       PUBLISH_INTERVAL: 3300
       FORCE_PUBLISH: false
+      RUN_MODE: scheduled
       LOG_LEVEL: INFO
 
     steps:
@@ -50,8 +50,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/newsflow2.db
-          key: newsflow2-db-v4-${{ github.run_id }}
+          key: newsflow2-db-v5-${{ github.run_id }}
           restore-keys: |
+            newsflow2-db-v5-
             newsflow2-db-v4-
             newsflow2-db-v2-
 
@@ -59,7 +60,7 @@ jobs:
         run: |
           echo "Trigger: ${{ github.event_name }}"
           echo "Schedule: ${{ github.event.schedule }}"
-          echo "Commit: ${{ github.sha }}"
+          echo "Mode: $RUN_MODE"
 
       - name: Install project
         run: |
