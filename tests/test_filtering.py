@@ -29,6 +29,24 @@ def test_accepts_nvme_storage_launch() -> None:
     assert HardwareNewsFilter().accepts(article)
 
 
+def test_rejects_laptop_launch() -> None:
+    article = Article(
+        source="MSI",
+        title="MSI launches gaming laptop with GeForce RTX graphics and NVMe SSD",
+        url="https://example.com/laptop",
+    )
+    assert not HardwareNewsFilter().accepts(article)
+
+
+def test_rejects_chromebook_launch() -> None:
+    article = Article(
+        source="Acer",
+        title="Acer announces Chromebook with new processor and DDR5 memory",
+        url="https://example.com/chromebook",
+    )
+    assert not HardwareNewsFilter().accepts(article)
+
+
 def test_rejects_financial_news() -> None:
     article = Article(
         source="Acer",
