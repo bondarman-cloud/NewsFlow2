@@ -6,7 +6,7 @@ os.environ.setdefault("CHANNEL_ID", "-1000000000000")
 os.environ.setdefault("GEMINI_API_KEY", "test-key")
 os.environ.setdefault("BOT_ID", "hardware_news")
 
-from app.config import load_bot_profile
+from app.config import load_bot_profile  # noqa: E402
 
 
 def test_hardware_profile() -> None:
