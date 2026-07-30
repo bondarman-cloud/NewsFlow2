@@ -11,7 +11,7 @@ from app.models import Article
 
 class PublicationDatabase:
     DUPLICATE_TITLE_THRESHOLD = 0.90
-    PIPELINE_VERSION = 6
+    PIPELINE_VERSION = 7
 
     def __init__(self, path: Path) -> None:
         self._path = path
@@ -103,15 +103,12 @@ class PublicationDatabase:
         host = parts.netloc.lower()
         path = re.sub(r"/{2,}", "/", parts.path).rstrip("/") or "/"
 
-        # Google News adds locale parameters to the same article URL. They must not
-        # turn one story into several database records.
         query = "" if "news.google." in host else parts.query
         return urlunsplit((parts.scheme.lower(), host, path, query, ""))
 
     @staticmethod
     def title_key(title: str) -> str:
         value = unicodedata.normalize("NFKC", title).lower().strip()
-        # Google News commonly appends the publisher after the final dash.
         value = re.sub(r"\s+[-–—]\s+[^-–—]{2,50}$", "", value)
         value = re.sub(r"\b(the|a|an)\b", " ", value)
         value = re.sub(r"[^a-zа-яё0-9]+", " ", value, flags=re.IGNORECASE)
