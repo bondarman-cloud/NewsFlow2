@@ -11,7 +11,7 @@ defaults:
   max_articles_per_run: 1
   max_candidates: 1200
   max_age_hours: 1440
-  publish_interval: 3300
+  publish_interval: 1800
 
 discovery_queries:
   - name: Desktop hardware launches
