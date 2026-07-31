@@ -16,6 +16,7 @@ BOT_ID_PATTERN = re.compile(r"^[a-z][a-z0-9_]*$")
 class BotProfile:
     id: str
     title: str
+    application: str
     filter_type: str
     base_tag: str
     sources_path: Path
@@ -67,6 +68,7 @@ def load_bot_profile(bot_id: str | None = None, root: Path | None = None) -> Bot
     return BotProfile(
         id=profile_id,
         title=str(data.get("title", profile_id)).strip(),
+        application=str(data.get("application", "news")).strip().lower(),
         filter_type=str(data.get("filter", "tech")).strip().lower(),
         base_tag=str(data.get("base_tag", "новости")).strip(),
         sources_path=relative_path("sources", str(profile_dir / "sources.yaml")),
@@ -122,6 +124,10 @@ class Settings(BaseSettings):
     @property
     def title(self) -> str:
         return profile.title
+
+    @property
+    def application(self) -> str:
+        return profile.application
 
     @property
     def filter_type(self) -> str:
