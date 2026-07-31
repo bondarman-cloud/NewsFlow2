@@ -1,0 +1,23 @@
+name: Run WorldFood manually
+run-name: WorldFood manual
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    uses: ./.github/workflows/run-bot.yml
+    with:
+      bot_id: worldfood_bot
+      run_mode: manual
+      force_publish: true
+      database_path: data/worldfood_bot.db
+      cache_prefix: worldfood-db-v1
+      legacy_cache_prefix: worldfood-db-v1
+    secrets:
+      bot_token: ${{ secrets.WORLDFOOD_BOT_TOKEN }}
+      channel_id: ${{ secrets.WORLDFOOD_CHANNEL_ID }}
+      gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
