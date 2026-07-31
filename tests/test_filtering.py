@@ -1,4 +1,9 @@
-from app.filtering import HardwareNewsFilter, TechNewsFilter, build_filter
+from app.filtering import (
+    HardwareNewsFilter,
+    RecipeFilter,
+    TechNewsFilter,
+    build_filter,
+)
 from app.models import Article
 
 
@@ -84,6 +89,28 @@ def test_tech_filter_rejects_webinar() -> None:
     assert not TechNewsFilter().accepts(article)
 
 
+def test_recipe_filter_accepts_single_dish() -> None:
+    article = Article(
+        source="World Recipes",
+        title="Traditional Armenian khorovats recipe",
+        url="https://example.com/khorovats",
+        rss_summary="Ingredients and instructions for grilled Armenian pork",
+    )
+    recipe_filter = RecipeFilter()
+    assert recipe_filter.accepts(article)
+    assert recipe_filter.priority(article) > 0
+
+
+def test_recipe_filter_rejects_roundup() -> None:
+    article = Article(
+        source="World Recipes",
+        title="The 25 best recipes for this summer",
+        url="https://example.com/roundup",
+    )
+    assert not RecipeFilter().accepts(article)
+
+
 def test_filter_factory() -> None:
     assert isinstance(build_filter("hardware"), HardwareNewsFilter)
     assert isinstance(build_filter("tech"), TechNewsFilter)
+    assert isinstance(build_filter("recipe"), RecipeFilter)

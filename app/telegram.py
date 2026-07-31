@@ -12,19 +12,24 @@ class TelegramPublisher:
 
     async def publish(self, text: str, image_path: Path | None = None) -> None:
         if image_path is None:
-            await self._bot.send_message(
-                chat_id=settings.channel_id,
-                text=text,
-                parse_mode="HTML",
-            )
+            await self.publish_text(text)
             return
+        await self.publish_photo(text, image_path)
 
+    async def publish_text(self, text: str) -> None:
+        await self._bot.send_message(
+            chat_id=settings.channel_id,
+            text=text,
+            parse_mode="HTML",
+        )
+
+    async def publish_photo(self, caption: str, image_path: Path) -> None:
         if not image_path.exists():
             raise RuntimeError(f"Файл изображения не найден: {image_path}")
         await self._bot.send_photo(
             chat_id=settings.channel_id,
             photo=FSInputFile(image_path, filename=image_path.name),
-            caption=text,
+            caption=caption,
             parse_mode="HTML",
         )
 
