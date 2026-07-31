@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - "feature/**"
+      - worldfood-bot
   pull_request:
     branches: [main]
 
@@ -50,9 +51,9 @@ jobs:
           python - <<'PY'
           from app.config import load_bot_profile
 
-          for bot_id in ("hardware_news", "tech_news"):
+          for bot_id in ("hardware_news", "tech_news", "worldfood_bot"):
               profile = load_bot_profile(bot_id)
               assert profile.sources_path.is_file()
               assert profile.prompt_path.is_file()
-              print(bot_id, profile.title)
+              print(bot_id, profile.title, profile.application)
           PY
