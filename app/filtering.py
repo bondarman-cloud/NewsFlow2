@@ -135,10 +135,53 @@ class TechNewsFilter:
         return hits * 4 + title_hits * 3
 
 
+class RecipeFilter:
+    RECIPE_KEYWORDS = {
+        "recipe", "ingredients", "instructions", "how to make", "traditional",
+        "homemade", "dish", "soup", "stew", "curry", "bread", "salad", "dessert",
+        "cake", "pastry", "noodles", "rice", "pasta", "dumplings", "roast", "grill",
+        "sauce", "cookies", "pie", "breakfast", "dinner", "lunch", "appetizer",
+    }
+    CUISINE_KEYWORDS = {
+        "armenian", "turkish", "georgian", "greek", "italian", "french", "spanish",
+        "portuguese", "mexican", "brazilian", "peruvian", "argentinian", "uruguayan",
+        "indian", "pakistani", "thai", "vietnamese", "chinese", "japanese", "korean",
+        "indonesian", "malaysian", "lebanese", "syrian", "persian", "moroccan",
+        "ethiopian", "nigerian", "german", "polish", "ukrainian", "russian",
+    }
+    EXCLUDED_KEYWORDS = {
+        "roundup", "best recipes", "recipe collection", "meal plan", "restaurant review",
+        "restaurant news", "celebrity", "giveaway", "sponsored", "product review",
+        "kitchen gadget", "cookbook review", "weekly menu", "travel guide",
+    }
+
+    @staticmethod
+    def _normalize(value: str) -> str:
+        return re.sub(r"\s+", " ", value.lower()).strip()
+
+    def accepts(self, article: Article) -> bool:
+        text = self._normalize(f"{article.title} {article.rss_summary}")
+        if len(article.title.strip()) < 5:
+            return False
+        return not any(term in text for term in self.EXCLUDED_KEYWORDS)
+
+    def priority(self, article: Article) -> int:
+        text = self._normalize(f"{article.title} {article.rss_summary}")
+        if any(term in text for term in self.EXCLUDED_KEYWORDS):
+            return -10_000
+        recipe_hits = sum(term in text for term in self.RECIPE_KEYWORDS)
+        cuisine_hits = sum(term in text for term in self.CUISINE_KEYWORDS)
+        return recipe_hits * 4 + cuisine_hits * 6
+
+
 def build_filter(filter_type: str) -> ArticleFilter:
-    filters: dict[str, type[HardwareNewsFilter] | type[TechNewsFilter]] = {
+    filters: dict[
+        str,
+        type[HardwareNewsFilter | TechNewsFilter | RecipeFilter],
+    ] = {
         "hardware": HardwareNewsFilter,
         "tech": TechNewsFilter,
+        "recipe": RecipeFilter,
     }
     try:
         return filters[filter_type]()
