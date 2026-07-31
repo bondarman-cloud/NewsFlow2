@@ -32,11 +32,20 @@ async def run() -> None:
 
     # Import after selecting the profile. Settings are intentionally loaded once.
     from app.config import settings
-    from app.service import NewsFlowService
 
-    service = NewsFlowService()
+    if settings.application == "news":
+        from app.service import NewsFlowService
+
+        service = NewsFlowService()
+    elif settings.application == "worldfood":
+        from app.worldfood import WorldFoodService
+
+        service = WorldFoodService()
+    else:
+        raise ValueError(f"Неизвестный тип приложения: {settings.application!r}")
+
     published = await service.run()
-    print(f"{settings.bot_id}: опубликовано статей: {published}")
+    print(f"{settings.bot_id}: опубликовано материалов: {published}")
 
 
 if __name__ == "__main__":
