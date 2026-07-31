@@ -1,0 +1,17 @@
+id: worldfood_bot
+title: WorldFood Bot
+application: worldfood
+filter: recipe
+base_tag: мировая_кухня
+sources: bots/worldfood_bot/sources.yaml
+prompt: bots/worldfood_bot/prompt.txt
+require_image: true
+query_exclusions: ""
+
+defaults:
+  max_articles_per_run: 1
+  max_candidates: 120
+  max_age_hours: 4320
+  publish_interval: 86400
+
+discovery_queries: []
