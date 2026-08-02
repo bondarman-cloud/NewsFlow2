@@ -6,6 +6,10 @@ on:
     branches: [main]
     paths:
       - ".automation/hourly-trigger.txt"
+  # Backup trigger. The external hourly automation remains the primary scheduler,
+  # while GitHub cron gives us a second chance if that automation is paused.
+  schedule:
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
