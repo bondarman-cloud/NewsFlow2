@@ -1,6 +1,8 @@
+import asyncio
 import hashlib
 from io import BytesIO
 from pathlib import Path
+from urllib.parse import urlparse
 
 import httpx
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -13,10 +15,13 @@ class ImageService:
     HEADERS = {
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 Chrome/131.0 Safari/537.36"
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/131.0 Safari/537.36"
         ),
         "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
     }
+    RETRYABLE_STATUS_CODES = {403, 408, 425, 429, 500, 502, 503, 504}
 
     def __init__(self) -> None:
         settings.image_cache_dir.mkdir(parents=True, exist_ok=True)
@@ -25,18 +30,8 @@ class ImageService:
         if not image_url:
             return None
 
-        headers = dict(self.HEADERS)
-        headers["Referer"] = referer
-        try:
-            async with httpx.AsyncClient(
-                timeout=httpx.Timeout(30.0),
-                follow_redirects=True,
-                headers=headers,
-            ) as client:
-                response = await client.get(image_url)
-                response.raise_for_status()
-        except httpx.HTTPError as exc:
-            logger.info("Изображение не скачано {}: {}", image_url, exc)
+        response = await self._fetch_image(image_url, referer)
+        if response is None:
             return None
 
         content_type = response.headers.get("content-type", "").lower()
@@ -72,3 +67,39 @@ class ImageService:
             return None
         logger.info("Изображение готово: {}", destination)
         return destination
+
+    async def _fetch_image(self, image_url: str, referer: str) -> httpx.Response | None:
+        article_host = urlparse(referer).netloc
+        origin_referer = f"https://{article_host}/" if article_host else referer
+        header_variants = (
+            {**self.HEADERS, "Referer": referer},
+            {**self.HEADERS, "Referer": origin_referer},
+            self.HEADERS,
+        )
+        last_error: httpx.HTTPError | None = None
+
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(30.0),
+            follow_redirects=True,
+        ) as client:
+            for attempt, headers in enumerate(header_variants, start=1):
+                try:
+                    response = await client.get(image_url, headers=headers)
+                    response.raise_for_status()
+                    return response
+                except httpx.HTTPError as exc:
+                    last_error = exc
+                    status = exc.response.status_code if isinstance(exc, httpx.HTTPStatusError) else None
+                    if status not in self.RETRYABLE_STATUS_CODES or attempt == len(header_variants):
+                        break
+                    logger.info(
+                        "Повтор загрузки изображения {}/{} после HTTP {}: {}",
+                        attempt + 1,
+                        len(header_variants),
+                        status,
+                        image_url,
+                    )
+                    await asyncio.sleep(attempt)
+
+        logger.info("Изображение не скачано {}: {}", image_url, last_error)
+        return None

@@ -1,7 +1,7 @@
 import re
 import sqlite3
 import unicodedata
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
@@ -11,7 +11,8 @@ from app.models import Article
 
 class PublicationDatabase:
     DUPLICATE_TITLE_THRESHOLD = 0.90
-    PIPELINE_VERSION = 8
+    PIPELINE_VERSION = 9
+    NON_PUBLISHED_RETRY_HOURS = 6
 
     def __init__(self, path: Path) -> None:
         self._path = path
@@ -129,9 +130,12 @@ class PublicationDatabase:
             ).fetchone()
         return row is not None
 
-    def is_duplicate(self, article: Article) -> bool:
+    def is_duplicate(self, article: Article, *, retry_non_published: bool = False) -> bool:
         canonical = self.canonical_url(article.url)
         key = self.title_key(article.title)
+        retry_cutoff = (
+            datetime.now(timezone.utc) - timedelta(hours=self.NON_PUBLISHED_RETRY_HOURS)
+        ).isoformat()
 
         with self._connect() as connection:
             exact = connection.execute(
@@ -142,8 +146,10 @@ class PublicationDatabase:
                     status = 'published'
                     AND (url = ? OR canonical_url = ? OR title_key = ?)
                 ) OR (
-                    status != 'published'
+                    ? = 0
+                    AND status != 'published'
                     AND pipeline_version = ?
+                    AND created_at >= ?
                     AND (url = ? OR canonical_url = ?)
                 )
                 LIMIT 1
@@ -152,7 +158,9 @@ class PublicationDatabase:
                     article.url,
                     canonical,
                     key,
+                    int(retry_non_published),
                     self.PIPELINE_VERSION,
+                    retry_cutoff,
                     article.url,
                     canonical,
                 ),
