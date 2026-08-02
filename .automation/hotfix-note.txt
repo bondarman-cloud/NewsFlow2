@@ -1,0 +1,1 @@
+Runtime hotfix: restored the last known working Gemini client and removed blocking preflight checks.
