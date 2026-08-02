@@ -16,6 +16,7 @@ class EditorialResult:
     title: str
     summary: str
     tags: list[str]
+    reason: str = ""
 
 
 class GeminiEditor:
@@ -106,6 +107,7 @@ class GeminiEditor:
             title=str(data.get("title", "")).strip(),
             summary=str(data.get("summary", "")).strip(),
             tags=[str(tag).strip() for tag in data.get("tags", []) if str(tag).strip()],
+            reason=str(data.get("reason", "")).strip(),
         )
 
     @staticmethod
