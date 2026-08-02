@@ -73,8 +73,10 @@ class NewsFlowService:
 
         published = 0
         counters = {
+            "local_filtered": 0,
             "duplicates": 0,
             "load_errors": 0,
+            "feed_fallbacks": 0,
             "no_image": 0,
             "ai_rejected": 0,
             "ai_attempts": 0,
@@ -97,11 +99,13 @@ class NewsFlowService:
             )
 
             eligible = [article for article in articles if self._filter.accepts(article)]
+            counters["local_filtered"] = len(articles) - len(eligible)
             eligible_by_source = Counter(article.source for article in eligible)
             logger.info(
-                "Локально подходящих материалов [{}]: {}. Источники: {}",
+                "Локально подходящих материалов [{}]: {} из {}. Источники: {}",
                 settings.bot_id,
                 len(eligible),
+                len(articles),
                 ", ".join(
                     f"{source}={count}"
                     for source, count in eligible_by_source.most_common(40)
@@ -123,7 +127,10 @@ class NewsFlowService:
                     break
 
                 original_url = article.url
-                if self._database.is_duplicate(article):
+                if self._database.is_duplicate(
+                    article,
+                    retry_non_published=settings.force_publish,
+                ):
                     counters["duplicates"] += 1
                     self._database.save(article, "duplicate", aliases=(original_url,))
                     continue
@@ -138,10 +145,16 @@ class NewsFlowService:
                     article = await self._loader.load(article)
                 except Exception as exc:
                     counters["load_errors"] += 1
-                    logger.warning("Страница не загружена {}: {}", original_url, exc)
+                    logger.warning("Страница и RSS-анонс не загружены {}: {}", original_url, exc)
                     continue
 
-                if self._database.is_duplicate(article):
+                if article.used_feed_fallback:
+                    counters["feed_fallbacks"] += 1
+
+                if self._database.is_duplicate(
+                    article,
+                    retry_non_published=settings.force_publish,
+                ):
                     counters["duplicates"] += 1
                     self._database.save(article, "duplicate", aliases=(original_url,))
                     continue
@@ -150,6 +163,10 @@ class NewsFlowService:
                 if article.image_path is None and settings.require_image:
                     counters["no_image"] += 1
                     self._database.save(article, "no_image", aliases=(original_url,))
+                    logger.info(
+                        "Кандидат отклонён: для {} обязательно изображение, но оно недоступно",
+                        article.title,
+                    )
                     continue
 
                 counters["ai_attempts"] += 1
@@ -157,6 +174,12 @@ class NewsFlowService:
                 if not editorial.publish:
                     counters["ai_rejected"] += 1
                     self._database.save(article, "ai_rejected", aliases=(original_url,))
+                    logger.info(
+                        "AI отклонил [{}] {}. Причина: {}",
+                        article.source,
+                        article.title,
+                        editorial.reason or "модель не указала причину",
+                    )
                     continue
 
                 article.translated_title = editorial.title
@@ -185,11 +208,14 @@ class NewsFlowService:
                 )
 
             logger.info(
-                "Итог [{}]: опубликовано={}, дубли={}, ошибки загрузки={}, "
-                "без картинки={}, AI-проверок={}, отклонено AI={}",
+                "Итог [{}]: опубликовано={}, локально отсеяно={}, дубли={}, "
+                "RSS-fallback={}, ошибки загрузки={}, без картинки={}, "
+                "AI-проверок={}, отклонено AI={}",
                 settings.bot_id,
                 published,
+                counters["local_filtered"],
                 counters["duplicates"],
+                counters["feed_fallbacks"],
                 counters["load_errors"],
                 counters["no_image"],
                 counters["ai_attempts"],
