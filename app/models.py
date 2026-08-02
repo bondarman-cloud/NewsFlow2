@@ -16,3 +16,4 @@ class Article:
     translated_title: str = ""
     translated_summary: str = ""
     tags: list[str] = field(default_factory=list)
+    used_feed_fallback: bool = False
