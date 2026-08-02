@@ -1,11 +1,9 @@
-import asyncio
 import base64
 import json
 import re
 from dataclasses import dataclass
 
 import httpx
-from PIL import Image
 
 from app.config import settings
 from app.logger import logger
@@ -22,20 +20,16 @@ class EditorialResult:
 
 class GeminiEditor:
     MODELS = (
-        "gemini-3.5-flash-lite",
-        "gemini-3.6-flash",
-        "gemini-flash-latest",
         "gemini-3.1-flash-lite",
+        "gemini-3.5-flash-lite",
+        "gemini-flash-latest",
     )
     MAX_INLINE_IMAGE_BYTES = 8_000_000
-    RETRY_DELAYS = (0, 3, 10)
-    RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
     async def process(self, article: Article) -> EditorialResult:
         prompt = self._prompt(article)
         last_error: Exception | None = None
-        text_parts: list[dict] = [{"text": prompt}]
-        parts: list[dict] = list(text_parts)
+        parts: list[dict] = [{"text": prompt}]
 
         if article.image_path and article.image_path.exists():
             image_bytes = article.image_path.read_bytes()
@@ -43,7 +37,7 @@ class GeminiEditor:
                 parts.append(
                     {
                         "inlineData": {
-                            "mimeType": self._image_mime_type(article.image_path),
+                            "mimeType": "image/jpeg",
                             "data": base64.b64encode(image_bytes).decode("ascii"),
                         }
                     }
@@ -54,96 +48,45 @@ class GeminiEditor:
                     len(image_bytes),
                 )
 
-        variants = [parts]
-        if len(parts) > len(text_parts):
-            # A malformed or unsupported image must not block the entire publication.
-            variants.append(text_parts)
-
-        async with httpx.AsyncClient(timeout=httpx.Timeout(75.0)) as client:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(60.0)) as client:
             for model in self.MODELS:
-                for variant_index, current_parts in enumerate(variants):
-                    using_image = len(current_parts) > len(text_parts)
-
-                    for attempt, delay in enumerate(self.RETRY_DELAYS, start=1):
-                        if delay:
-                            await asyncio.sleep(delay)
-
-                        url = (
-                            "https://generativelanguage.googleapis.com/v1beta/models/"
-                            f"{model}:generateContent?key={settings.gemini_api_key}"
+                url = (
+                    "https://generativelanguage.googleapis.com/v1beta/models/"
+                    f"{model}:generateContent?key={settings.gemini_api_key}"
+                )
+                payload = {
+                    "contents": [{"parts": parts}],
+                    "generationConfig": {
+                        "thinkingConfig": {"thinkingLevel": "minimal"},
+                    },
+                }
+                try:
+                    response = await client.post(url, json=payload)
+                    if response.status_code in {400, 404, 429}:
+                        logger.warning(
+                            "Gemini {} вернул HTTP {}: {}",
+                            model,
+                            response.status_code,
+                            response.text[:300],
                         )
-                        payload = {
-                            "contents": [{"parts": current_parts}],
-                            "generationConfig": {
-                                "thinkingConfig": {"thinkingLevel": "minimal"},
-                                "responseMimeType": "application/json",
-                            },
-                        }
-
-                        try:
-                            response = await client.post(url, json=payload)
-
-                            if response.status_code in self.RETRYABLE_STATUS_CODES:
-                                last_error = RuntimeError(
-                                    f"Gemini {model} HTTP {response.status_code}"
-                                )
-                                logger.warning(
-                                    "Gemini {} вернул HTTP {} (попытка {}/{}): {}",
-                                    model,
-                                    response.status_code,
-                                    attempt,
-                                    len(self.RETRY_DELAYS),
-                                    response.text[:300],
-                                )
-                                if attempt < len(self.RETRY_DELAYS):
-                                    continue
-                                break
-
-                            if response.status_code in {400, 404}:
-                                last_error = RuntimeError(
-                                    f"Gemini {model} HTTP {response.status_code}"
-                                )
-                                logger.warning(
-                                    "Gemini {} вернул HTTP {}{}: {}",
-                                    model,
-                                    response.status_code,
-                                    " с изображением" if using_image else "",
-                                    response.text[:300],
-                                )
-                                break
-
-                            response.raise_for_status()
-                            text = self._extract_text(response.json())
-                            result = self._parse(text)
-                            logger.info(
-                                "Gemini обработал статью для {} через {}{}",
-                                settings.bot_id,
-                                model,
-                                " без изображения" if variant_index else "",
-                            )
-                            return result
-                        except (httpx.HTTPError, KeyError, ValueError, TypeError) as exc:
-                            last_error = exc
-                            logger.warning(
-                                "Ошибка Gemini {} (попытка {}/{}): {}",
-                                model,
-                                attempt,
-                                len(self.RETRY_DELAYS),
-                                exc,
-                            )
-                            if attempt < len(self.RETRY_DELAYS):
-                                continue
-                            break
+                        last_error = RuntimeError(
+                            f"Gemini {model} HTTP {response.status_code}"
+                        )
+                        continue
+                    response.raise_for_status()
+                    text = self._extract_text(response.json())
+                    result = self._parse(text)
+                    logger.info(
+                        "Gemini обработал статью для {} через {}",
+                        settings.bot_id,
+                        model,
+                    )
+                    return result
+                except (httpx.HTTPError, KeyError, ValueError, TypeError) as exc:
+                    last_error = exc
+                    logger.warning("Ошибка Gemini {}: {}", model, exc)
 
         raise RuntimeError(f"Все модели Gemini недоступны: {last_error}")
-
-    @staticmethod
-    def _image_mime_type(path) -> str:
-        try:
-            with Image.open(path) as image:
-                return Image.MIME.get(image.format, "image/jpeg")
-        except OSError:
-            return "image/jpeg"
 
     @staticmethod
     def _extract_text(payload: dict) -> str:
