@@ -15,11 +15,16 @@ class ArticleLoader:
     HEADERS = {
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 Chrome/131.0 Safari/537.36"
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/131.0 Safari/537.36"
         ),
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+        "Upgrade-Insecure-Requests": "1",
     }
+    RETRYABLE_STATUS_CODES = {403, 408, 425, 429, 500, 502, 503, 504}
 
     GENERIC_IMAGE_TOKENS = (
         "favicon",
@@ -48,19 +53,33 @@ class ArticleLoader:
             final_url = response_url
             content_url = final_url
             logger.info("Оригинальная страница загружена: {}", final_url)
-        except httpx.HTTPError as exc:
-            if resolved_url == original_url or "news.google." not in urlparse(original_url).netloc:
-                raise
-
-            used_google_fallback = True
-            logger.warning(
-                "Официальный сайт недоступен ({}). Использую текст Google News: {}",
-                exc,
-                resolved_url,
-            )
-            html, _ = await self._fetch_html(original_url)
-            final_url = resolved_url
-            content_url = original_url
+        except httpx.HTTPError as primary_error:
+            is_google_wrapper = "news.google." in urlparse(original_url).netloc.lower()
+            if resolved_url != original_url and is_google_wrapper:
+                try:
+                    used_google_fallback = True
+                    logger.warning(
+                        "Официальный сайт недоступен ({}). Использую текст Google News: {}",
+                        primary_error,
+                        original_url,
+                    )
+                    html, _ = await self._fetch_html(original_url)
+                    final_url = resolved_url
+                    content_url = original_url
+                except httpx.HTTPError as google_error:
+                    return self._use_feed_fallback(
+                        article,
+                        resolved_url,
+                        rss_image,
+                        google_error,
+                    )
+            else:
+                return self._use_feed_fallback(
+                    article,
+                    resolved_url,
+                    rss_image,
+                    primary_error,
+                )
 
         soup = BeautifulSoup(html, "html.parser")
 
@@ -75,12 +94,9 @@ class ArticleLoader:
         page_image = self._extract_image(soup, content_url)
 
         if used_google_fallback:
-            # Google News HTML may contain an image from a neighbouring card or a generic service image.
-            # The RSS enclosure is tied to this exact feed entry and is therefore safer.
             article.image_url = rss_image
             image_origin = "RSS Google News"
         else:
-            # The original article's Open Graph/JSON-LD image is the most reliable source.
             article.image_url = page_image or rss_image
             image_origin = "страница статьи" if page_image else "RSS"
 
@@ -100,15 +116,75 @@ class ArticleLoader:
         logger.info("Материал подготовлен: {} символов, {}", len(article.content), final_url)
         return article
 
+    def _use_feed_fallback(
+        self,
+        article: Article,
+        resolved_url: str,
+        rss_image: str | None,
+        error: httpx.HTTPError,
+    ) -> Article:
+        article.url = resolved_url
+        article.content = article.rss_summary.strip() or article.title
+        article.image_url = rss_image
+        article.used_feed_fallback = True
+        logger.warning(
+            "Страница заблокировала загрузку, использую RSS-анонс: {} ({} символов, ошибка: {})",
+            resolved_url,
+            len(article.content),
+            error,
+        )
+        return article
+
     async def _fetch_html(self, url: str) -> tuple[str, str]:
+        host = urlparse(url).netloc
+        header_variants = (
+            self.HEADERS,
+            {
+                **self.HEADERS,
+                "Referer": f"https://{host}/" if host else url,
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "same-origin",
+            },
+            {
+                "User-Agent": (
+                    "Mozilla/5.0 (Linux; Android 15; Pixel 9) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/131.0 Mobile Safari/537.36"
+                ),
+                "Accept": self.HEADERS["Accept"],
+                "Accept-Language": self.HEADERS["Accept-Language"],
+            },
+        )
+        last_error: httpx.HTTPError | None = None
+
         async with httpx.AsyncClient(
-            timeout=httpx.Timeout(12.0),
+            timeout=httpx.Timeout(18.0),
             follow_redirects=True,
-            headers=self.HEADERS,
         ) as client:
-            response = await client.get(url)
-            response.raise_for_status()
-        return response.text, str(response.url)
+            for attempt, headers in enumerate(header_variants, start=1):
+                try:
+                    response = await client.get(url, headers=headers)
+                    if response.status_code in self.RETRYABLE_STATUS_CODES:
+                        response.raise_for_status()
+                    response.raise_for_status()
+                    return response.text, str(response.url)
+                except httpx.HTTPError as exc:
+                    last_error = exc
+                    status = exc.response.status_code if isinstance(exc, httpx.HTTPStatusError) else None
+                    if status not in self.RETRYABLE_STATUS_CODES or attempt == len(header_variants):
+                        break
+                    logger.info(
+                        "Повтор загрузки страницы {}/{} после HTTP {}: {}",
+                        attempt + 1,
+                        len(header_variants),
+                        status,
+                        url,
+                    )
+                    await asyncio.sleep(attempt)
+
+        assert last_error is not None
+        raise last_error
 
     async def _resolve_google_news_url(self, url: str) -> str:
         host = urlparse(url).netloc.lower()
