@@ -98,56 +98,6 @@ jobs:
           print(f"Database: {settings.database_path}")
           PY
 
-      - name: Check Telegram and Gemini access
-        run: |
-          python - <<'PY'
-          import asyncio
-          import os
-
-          import httpx
-
-
-          async def main() -> None:
-              token = os.environ["BOT_TOKEN"]
-              channel_id = os.environ["CHANNEL_ID"]
-              api_key = os.environ["GEMINI_API_KEY"]
-
-              async with httpx.AsyncClient(timeout=httpx.Timeout(20.0)) as client:
-                  telegram_base = f"https://api.telegram.org/bot{token}"
-
-                  response = await client.get(f"{telegram_base}/getMe")
-                  if response.status_code != 200 or not response.json().get("ok"):
-                      raise SystemExit(
-                          f"Telegram BOT_TOKEN rejected: HTTP {response.status_code}"
-                      )
-                  bot_name = response.json()["result"].get("username", "unknown")
-
-                  response = await client.get(
-                      f"{telegram_base}/getChat",
-                      params={"chat_id": channel_id},
-                  )
-                  if response.status_code != 200 or not response.json().get("ok"):
-                      description = response.json().get("description", "unknown error")
-                      raise SystemExit(
-                          "Telegram channel is unavailable to the bot: "
-                          f"HTTP {response.status_code}, {description}"
-                      )
-
-                  response = await client.get(
-                      "https://generativelanguage.googleapis.com/v1beta/models",
-                      params={"key": api_key},
-                  )
-                  if response.status_code != 200:
-                      raise SystemExit(
-                          f"GEMINI_API_KEY rejected: HTTP {response.status_code}"
-                      )
-
-              print(f"External services are available for @{bot_name}")
-
-
-          asyncio.run(main())
-          PY
-
       - name: Publish one article
         run: |
           force_arg=""
