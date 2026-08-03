@@ -21,7 +21,7 @@ def test_recipe_editor_parses_complete_recipe() -> None:
         "dish_name": "Хоровац",
         "cuisine": "армянская",
         "intro": "Армянское блюдо из мяса, приготовленного на углях.",
-        "ingredients": ["1 кг свинины", "2 луковицы"],
+        "ingredients": ["1 кг свинины", "2 луковицы", "1 ч. л. соли"],
         "steps": ["Нарезать мясо.", "Обжарить на углях."],
         "history": "Хоровац занимает важное место в армянской застольной культуре.",
         "tags": ["армянская кухня", "гриль"],
@@ -33,8 +33,30 @@ def test_recipe_editor_parses_complete_recipe() -> None:
     assert result.publish is True
     assert result.dish_name == "Хоровац"
     assert result.cuisine == "армянская"
-    assert len(result.ingredients) == 2
+    assert len(result.ingredients) == 3
     assert len(result.steps) == 2
+    assert result.reason == ""
+
+
+def test_trusted_source_recipe_overrides_false_gate_when_complete() -> None:
+    payload = {
+        "publish": False,
+        "dish_name": "Гхорме сабзи",
+        "cuisine": "персидская",
+        "intro": "Травяное рагу.",
+        "ingredients": ["зелень", "мясо", "фасоль"],
+        "steps": ["Обжарить зелень.", "Тушить с мясом и фасолью."],
+        "history": "Блюдо широко распространено в иранской кухне.",
+        "tags": ["персидская кухня"],
+        "reason": "модель ошибочно решила отклонить",
+    }
+
+    result = GeminiRecipeEditor._parse(
+        json.dumps(payload, ensure_ascii=False),
+        trusted_source_recipe=True,
+    )
+
+    assert result.publish is True
     assert result.reason == ""
 
 
@@ -80,7 +102,7 @@ def test_worldfood_formatter_builds_three_posts() -> None:
                 "dish_name": "Манты",
                 "cuisine": "турецкая",
                 "intro": "Тесто с мясной начинкой.",
-                "ingredients": ["500 г муки", "400 г фарша"],
+                "ingredients": ["500 г муки", "400 г фарша", "1 луковица"],
                 "steps": ["Замесить тесто.", "Сформировать и приготовить манты."],
                 "history": "Блюдо распространено в Турции и соседних регионах.",
                 "tags": ["турецкая кухня"],
