@@ -1,5 +1,6 @@
 import re
 from typing import Protocol
+from urllib.parse import urlparse
 
 from app.models import Article
 
@@ -137,10 +138,12 @@ class TechNewsFilter:
 
 class RecipeFilter:
     RECIPE_KEYWORDS = {
-        "recipe", "ingredients", "instructions", "how to make", "traditional",
-        "homemade", "dish", "soup", "stew", "curry", "bread", "salad", "dessert",
-        "cake", "pastry", "noodles", "rice", "pasta", "dumplings", "roast", "grill",
-        "sauce", "cookies", "pie", "breakfast", "dinner", "lunch", "appetizer",
+        "recipe", "ingredients", "instructions", "directions", "how to make",
+        "traditional", "homemade", "dish", "soup", "stew", "curry", "bread",
+        "salad", "dessert", "cake", "pastry", "noodles", "rice", "pasta",
+        "dumplings", "roast", "grill", "sauce", "cookies", "pie", "breakfast",
+        "dinner", "lunch", "appetizer", "kebab", "kofta", "pilaf", "biryani",
+        "tagine", "dolma", "kimchi", "ramen", "tacos", "enchilada",
     }
     CUISINE_KEYWORDS = {
         "armenian", "turkish", "georgian", "greek", "italian", "french", "spanish",
@@ -148,12 +151,20 @@ class RecipeFilter:
         "indian", "pakistani", "thai", "vietnamese", "chinese", "japanese", "korean",
         "indonesian", "malaysian", "lebanese", "syrian", "persian", "moroccan",
         "ethiopian", "nigerian", "german", "polish", "ukrainian", "russian",
+        "filipino", "colombian", "venezuelan", "senegalese", "iranian", "iraqi",
     }
     EXCLUDED_KEYWORDS = {
         "roundup", "best recipes", "recipe collection", "meal plan", "restaurant review",
         "restaurant news", "celebrity", "giveaway", "sponsored", "product review",
         "kitchen gadget", "cookbook review", "weekly menu", "travel guide",
+        "summit", "world stage", "menu unveiled", "gala dinner", "conference",
+        "festival recap", "press release", "food news", "restaurant menu",
+        "where to eat", "things to do", "hotel", "tour", "award ceremony",
     }
+    URL_EXCLUDED_TOKENS = (
+        "/category/", "/tag/", "/author/", "/page/", "/news/", "/travel/",
+        "/restaurant", "/menu", "/roundup", "/collection", "/best-",
+    )
 
     @staticmethod
     def _normalize(value: str) -> str:
@@ -161,17 +172,37 @@ class RecipeFilter:
 
     def accepts(self, article: Article) -> bool:
         text = self._normalize(f"{article.title} {article.rss_summary}")
+        path = urlparse(article.url).path.lower()
         if len(article.title.strip()) < 5:
             return False
-        return not any(term in text for term in self.EXCLUDED_KEYWORDS)
+        if any(term in text for term in self.EXCLUDED_KEYWORDS):
+            return False
+        if any(token in path for token in self.URL_EXCLUDED_TOKENS):
+            return False
+        return (
+            article.from_archive
+            or article.is_recipe_source
+            or "/recipe" in path
+            or any(term in text for term in self.RECIPE_KEYWORDS)
+        )
 
     def priority(self, article: Article) -> int:
         text = self._normalize(f"{article.title} {article.rss_summary}")
+        path = urlparse(article.url).path.lower()
         if any(term in text for term in self.EXCLUDED_KEYWORDS):
             return -10_000
+        if any(token in path for token in self.URL_EXCLUDED_TOKENS):
+            return -10_000
+
         recipe_hits = sum(term in text for term in self.RECIPE_KEYWORDS)
         cuisine_hits = sum(term in text for term in self.CUISINE_KEYWORDS)
-        return recipe_hits * 4 + cuisine_hits * 6
+        return (
+            recipe_hits * 4
+            + cuisine_hits * 6
+            + (8 if article.is_recipe_source else 0)
+            + (5 if article.from_archive else 0)
+            + (8 if "/recipe" in path else 0)
+        )
 
 
 def build_filter(filter_type: str) -> ArticleFilter:
