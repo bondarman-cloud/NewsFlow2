@@ -38,9 +38,9 @@ async def run() -> None:
 
         service = NewsFlowService()
     elif settings.application == "worldfood":
-        from app.worldfood import WorldFoodService
+        from app.worldfood_guaranteed import GuaranteedWorldFoodService
 
-        service = WorldFoodService()
+        service = GuaranteedWorldFoodService()
     else:
         raise ValueError(f"Неизвестный тип приложения: {settings.application!r}")
 
