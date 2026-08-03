@@ -17,3 +17,7 @@ class Article:
     translated_summary: str = ""
     tags: list[str] = field(default_factory=list)
     used_feed_fallback: bool = False
+    is_recipe_source: bool = False
+    from_archive: bool = False
+    has_structured_recipe: bool = False
+    recipe_cuisine: str = ""

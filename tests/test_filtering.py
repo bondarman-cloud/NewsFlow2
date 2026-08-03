@@ -101,11 +101,32 @@ def test_recipe_filter_accepts_single_dish() -> None:
     assert recipe_filter.priority(article) > 0
 
 
+def test_recipe_filter_accepts_recipe_archive_entry() -> None:
+    article = Article(
+        source="Persian Mama",
+        title="Ghormeh Sabzi",
+        url="https://example.com/ghormeh-sabzi/",
+        from_archive=True,
+        is_recipe_source=True,
+    )
+    assert RecipeFilter().accepts(article)
+
+
 def test_recipe_filter_rejects_roundup() -> None:
     article = Article(
         source="World Recipes",
         title="The 25 best recipes for this summer",
         url="https://example.com/roundup",
+    )
+    assert not RecipeFilter().accepts(article)
+
+
+def test_recipe_filter_rejects_summit_menu_news() -> None:
+    article = Article(
+        source="Food Travel",
+        title="The secret NATO summit menu unveiled",
+        url="https://example.com/news/summit-menu/",
+        is_recipe_source=True,
     )
     assert not RecipeFilter().accepts(article)
 

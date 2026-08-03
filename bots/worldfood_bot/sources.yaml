@@ -1,19 +1,61 @@
 sources:
   - name: The Mediterranean Dish
     url: https://www.themediterraneandish.com/feed/
+    recipe_only: true
+    archive: true
   - name: RecipeTin Eats
     url: https://www.recipetineats.com/feed/
+    recipe_only: true
+    archive: true
   - name: Indian Healthy Recipes
     url: https://www.indianhealthyrecipes.com/feed/
+    recipe_only: true
+    archive: true
   - name: My Greek Dish
     url: https://www.mygreekdish.com/feed/
+    recipe_only: true
+    archive: true
   - name: Just One Cookbook
     url: https://www.justonecookbook.com/feed/
+    recipe_only: true
+    archive: true
   - name: Maangchi
     url: https://www.maangchi.com/feed
+    recipe_only: true
+    archive: true
   - name: Mexico in My Kitchen
     url: https://www.mexicoinmykitchen.com/feed/
-  - name: Turkish Food Travel
-    url: https://www.turkishfoodtravel.com/feed/
-  - name: 196 Flavors Armenia
-    url: https://www.196flavors.com/category/armenia/feed/
+    recipe_only: true
+    archive: true
+  - name: My Korean Kitchen
+    url: https://mykoreankitchen.com/feed/
+    recipe_only: true
+    archive: true
+  - name: Persian Mama
+    url: https://persianmama.com/feed/
+    recipe_only: true
+    archive: true
+  - name: Panning The Globe
+    url: https://www.panningtheglobe.com/feed/
+    recipe_only: true
+    archive: true
+  - name: Spain on a Fork
+    url: https://spainonafork.com/feed/
+    recipe_only: true
+    archive: true
+  - name: The Woks of Life
+    url: https://thewoksoflife.com/feed/
+    recipe_only: true
+    archive: true
+  - name: Amira's Pantry
+    url: https://amiraspantry.com/feed/
+    recipe_only: true
+    archive: true
+  - name: Hungry Paprikas
+    url: https://www.hungrypaprikas.com/feed/
+    recipe_only: true
+    archive: true
+  - name: Caroline's Cooking
+    url: https://www.carolinescooking.com/feed/
+    recipe_only: true
+    archive: true
