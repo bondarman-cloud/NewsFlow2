@@ -30,6 +30,7 @@ class RecipeEditorialResult:
     steps: list[str]
     history: str
     tags: list[str]
+    reason: str = ""
 
 
 class GeminiRecipeEditor:
@@ -110,9 +111,12 @@ class GeminiRecipeEditor:
         dish_name = str(data.get("dish_name", "")).strip()
         cuisine = str(data.get("cuisine", "")).strip()
         history = str(data.get("history", "")).strip()
+        reason = str(data.get("reason", "")).strip()
         publish = bool(data.get("publish", False))
         if not dish_name or not cuisine or not ingredients or not steps or not history:
             publish = False
+            if not reason:
+                reason = "ответ не содержит полного названия, кухни, ингредиентов, шагов или истории"
 
         return RecipeEditorialResult(
             publish=publish,
@@ -123,6 +127,7 @@ class GeminiRecipeEditor:
             steps=steps,
             history=history,
             tags=cls._string_list(data.get("tags", [])),
+            reason=reason,
         )
 
     @staticmethod
@@ -216,6 +221,8 @@ class WorldFoodFormatter:
 class WorldFoodService:
     MAX_AI_ATTEMPTS = 20
     MAX_CANDIDATES_PER_SOURCE = 2
+    MIN_FULL_PAGE_CHARS = 250
+    MIN_FEED_FALLBACK_CHARS = 120
 
     def __init__(self) -> None:
         self._database = PublicationDatabase(settings.database_path)
@@ -229,6 +236,7 @@ class WorldFoodService:
 
     def _interval_has_elapsed(self) -> bool:
         if settings.force_publish:
+            logger.info("Ручной WorldFood: интервал и недавние неудачные проверки игнорируются")
             return True
         latest = self._database.latest_published_at(publication_mode="scheduled")
         if latest is None:
@@ -248,6 +256,12 @@ class WorldFoodService:
                 break
         return selected
 
+    def _is_duplicate(self, article: Article) -> bool:
+        return self._database.is_duplicate(
+            article,
+            retry_non_published=settings.force_publish,
+        )
+
     async def run(self) -> int:
         if not self._interval_has_elapsed():
             logger.info("Интервал публикации worldfood_bot ещё не истёк")
@@ -255,7 +269,17 @@ class WorldFoodService:
             return 0
 
         published = 0
-        ai_attempts = 0
+        counters = {
+            "local_filtered": 0,
+            "duplicates": 0,
+            "load_errors": 0,
+            "feed_fallbacks": 0,
+            "insufficient_recipe": 0,
+            "no_image": 0,
+            "ai_attempts": 0,
+            "ai_rejected": 0,
+        }
+
         try:
             logger.info("Запуск {} в режиме {}", settings.bot_id, settings.run_mode)
             articles = await self._sources.fetch()
@@ -266,42 +290,100 @@ class WorldFoodService:
                 ),
                 reverse=True,
             )
-            candidates = self._diversify(
-                [article for article in articles if self._filter.accepts(article)]
+
+            eligible = [article for article in articles if self._filter.accepts(article)]
+            counters["local_filtered"] = len(articles) - len(eligible)
+            candidates = self._diversify(eligible)
+            logger.info(
+                "Кандидатов на рецепт: {} из {} свежих; локально отклонено={}",
+                len(candidates),
+                len(articles),
+                counters["local_filtered"],
             )
-            logger.info("Кандидатов на рецепт: {}", len(candidates))
 
             for article in candidates:
                 if published >= settings.max_articles_per_run:
                     break
-                if ai_attempts >= self.MAX_AI_ATTEMPTS:
+                if counters["ai_attempts"] >= self.MAX_AI_ATTEMPTS:
+                    logger.info("Достигнут лимит AI-проверок WorldFood: {}", self.MAX_AI_ATTEMPTS)
                     break
 
                 original_url = article.url
-                if self._database.is_duplicate(article):
+                if self._is_duplicate(article):
+                    counters["duplicates"] += 1
+                    logger.info(
+                        "WorldFood пропускает уже опубликованный или недавно проверенный материал: "
+                        "[{}] {}",
+                        article.source,
+                        article.title,
+                    )
                     continue
 
+                logger.info("WorldFood проверяет [{}]: {}", article.source, article.title)
                 try:
                     article = await self._loader.load(article)
                 except Exception as exc:
+                    counters["load_errors"] += 1
                     logger.warning("Страница рецепта не загружена {}: {}", original_url, exc)
                     continue
 
-                if self._database.is_duplicate(article):
+                if article.used_feed_fallback:
+                    counters["feed_fallbacks"] += 1
+
+                if self._is_duplicate(article):
+                    counters["duplicates"] += 1
+                    logger.info(
+                        "WorldFood обнаружил дубль после раскрытия URL: [{}] {}",
+                        article.source,
+                        article.title,
+                    )
                     continue
-                if len(article.content.strip()) < 250:
-                    self._database.save(article, "insufficient_recipe", aliases=(original_url,))
+
+                minimum_chars = (
+                    self.MIN_FEED_FALLBACK_CHARS
+                    if article.used_feed_fallback
+                    else self.MIN_FULL_PAGE_CHARS
+                )
+                content_length = len(article.content.strip())
+                if content_length < minimum_chars:
+                    counters["insufficient_recipe"] += 1
+                    self._database.save(
+                        article,
+                        "insufficient_recipe",
+                        aliases=(original_url,),
+                    )
+                    logger.info(
+                        "WorldFood отклонил [{}] {}: текста недостаточно для честного рецепта "
+                        "({} символов, нужно минимум {})",
+                        article.source,
+                        article.title,
+                        content_length,
+                        minimum_chars,
+                    )
                     continue
 
                 article.image_path = await self._images.download(article.image_url, article.url)
                 if article.image_path is None:
+                    counters["no_image"] += 1
                     self._database.save(article, "no_image", aliases=(original_url,))
+                    logger.info(
+                        "WorldFood отклонил [{}] {}: фотография готового блюда недоступна",
+                        article.source,
+                        article.title,
+                    )
                     continue
 
-                ai_attempts += 1
+                counters["ai_attempts"] += 1
                 editorial = await self._editor.process(article)
                 if not editorial.publish:
+                    counters["ai_rejected"] += 1
                     self._database.save(article, "ai_rejected", aliases=(original_url,))
+                    logger.info(
+                        "AI отклонил рецепт [{}] {}. Причина: {}",
+                        article.source,
+                        article.title,
+                        editorial.reason or "причина не указана",
+                    )
                     continue
 
                 caption = self._formatter.photo_caption(editorial, article)
@@ -332,9 +414,18 @@ class WorldFoodService:
                 )
 
             logger.info(
-                "Итог worldfood_bot: блюд={}, AI-проверок={}",
+                "Итог worldfood_bot: блюд={}, локально отклонено={}, дубли={}, "
+                "ошибки загрузки={}, RSS fallback={}, мало текста={}, без фото={}, "
+                "AI-проверок={}, отклонено AI={}",
                 published,
-                ai_attempts,
+                counters["local_filtered"],
+                counters["duplicates"],
+                counters["load_errors"],
+                counters["feed_fallbacks"],
+                counters["insufficient_recipe"],
+                counters["no_image"],
+                counters["ai_attempts"],
+                counters["ai_rejected"],
             )
             return published
         finally:
