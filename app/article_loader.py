@@ -1,5 +1,6 @@
 import asyncio
 import json
+from collections.abc import Iterable
 from urllib.parse import urljoin, urlparse
 
 import httpx
@@ -92,28 +93,51 @@ class ArticleLoader:
 
         article.url = final_url
         page_image = self._extract_image(soup, content_url)
+        recipe = self._extract_structured_recipe(soup)
 
-        if used_google_fallback:
-            article.image_url = rss_image
-            image_origin = "RSS Google News"
+        if recipe is not None:
+            article.has_structured_recipe = True
+            article.recipe_cuisine = str(recipe["cuisine"])
+            if recipe["name"]:
+                article.title = str(recipe["name"])
+            structured_image = self._clean_image_url(
+                urljoin(content_url, str(recipe["image"])) if recipe["image"] else None
+            )
+            article.image_url = structured_image or page_image or rss_image
+            article.content = self._structured_recipe_text(recipe)
+            logger.info(
+                "Найден JSON-LD Recipe: ингредиентов={}, шагов={}, кухня={}",
+                len(recipe["ingredients"]),
+                len(recipe["instructions"]),
+                recipe["cuisine"] or "не указана",
+            )
         else:
-            article.image_url = page_image or rss_image
-            image_origin = "страница статьи" if page_image else "RSS"
+            if used_google_fallback:
+                article.image_url = rss_image
+                image_origin = "RSS Google News"
+            else:
+                article.image_url = page_image or rss_image
+                image_origin = "страница статьи" if page_image else "RSS"
 
-        if article.image_url:
-            logger.info("Изображение выбрано из источника: {}", image_origin)
-        else:
+            extracted = trafilatura.extract(
+                html,
+                url=content_url,
+                include_comments=False,
+                include_tables=False,
+                favor_precision=True,
+            )
+            article.content = extracted or article.rss_summary or article.title
+            if article.image_url:
+                logger.info("Изображение выбрано из источника: {}", image_origin)
+
+        if not article.image_url:
             logger.info("Подходящее изображение для материала не найдено")
 
-        extracted = trafilatura.extract(
-            html,
-            url=content_url,
-            include_comments=False,
-            include_tables=False,
-            favor_precision=True,
+        logger.info(
+            "Материал подготовлен: {} символов, {}",
+            len(article.content),
+            final_url,
         )
-        article.content = extracted or article.rss_summary or article.title
-        logger.info("Материал подготовлен: {} символов, {}", len(article.content), final_url)
         return article
 
     def _use_feed_fallback(
@@ -128,7 +152,8 @@ class ArticleLoader:
         article.image_url = rss_image
         article.used_feed_fallback = True
         logger.warning(
-            "Страница заблокировала загрузку, использую RSS-анонс: {} ({} символов, ошибка: {})",
+            "Страница заблокировала загрузку, использую RSS-анонс: {} "
+            "({} символов, ошибка: {})",
             resolved_url,
             len(article.content),
             error,
@@ -171,8 +196,15 @@ class ArticleLoader:
                     return response.text, str(response.url)
                 except httpx.HTTPError as exc:
                     last_error = exc
-                    status = exc.response.status_code if isinstance(exc, httpx.HTTPStatusError) else None
-                    if status not in self.RETRYABLE_STATUS_CODES or attempt == len(header_variants):
+                    status = (
+                        exc.response.status_code
+                        if isinstance(exc, httpx.HTTPStatusError)
+                        else None
+                    )
+                    if (
+                        status not in self.RETRYABLE_STATUS_CODES
+                        or attempt == len(header_variants)
+                    ):
                         break
                     logger.info(
                         "Повтор загрузки страницы {}/{} после HTTP {}: {}",
@@ -230,7 +262,9 @@ class ArticleLoader:
             except (json.JSONDecodeError, TypeError):
                 continue
             value = self._json_image(payload)
-            candidate = self._clean_image_url(urljoin(base_url, value) if value else None)
+            candidate = self._clean_image_url(
+                urljoin(base_url, value) if value else None
+            )
             if candidate:
                 return candidate
 
@@ -247,6 +281,135 @@ class ArticleLoader:
                 if candidate:
                     return candidate
         return None
+
+    def _extract_structured_recipe(self, soup: BeautifulSoup) -> dict[str, object] | None:
+        for script in soup.find_all("script", type="application/ld+json"):
+            try:
+                payload = json.loads(script.string or script.get_text())
+            except (json.JSONDecodeError, TypeError):
+                continue
+
+            for item in self._walk_json(payload):
+                types = item.get("@type", [])
+                if isinstance(types, str):
+                    type_values = [types]
+                elif isinstance(types, list):
+                    type_values = [str(value) for value in types]
+                else:
+                    type_values = []
+
+                if not any(value.lower() == "recipe" for value in type_values):
+                    continue
+
+                ingredients = self._string_values(item.get("recipeIngredient", []))
+                instructions = self._instruction_values(
+                    item.get("recipeInstructions", [])
+                )
+                if len(ingredients) < 3 or len(instructions) < 2:
+                    continue
+
+                cuisine_value = item.get("recipeCuisine", "")
+                if isinstance(cuisine_value, list):
+                    cuisine = ", ".join(
+                        str(value).strip()
+                        for value in cuisine_value
+                        if str(value).strip()
+                    )
+                else:
+                    cuisine = str(cuisine_value).strip()
+
+                return {
+                    "name": str(item.get("name", "")).strip(),
+                    "cuisine": cuisine,
+                    "description": str(item.get("description", "")).strip(),
+                    "ingredients": ingredients,
+                    "instructions": instructions,
+                    "image": self._recipe_image(item.get("image")),
+                }
+        return None
+
+    @classmethod
+    def _walk_json(cls, value: object) -> Iterable[dict]:
+        if isinstance(value, dict):
+            yield value
+            for child in value.values():
+                yield from cls._walk_json(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from cls._walk_json(child)
+
+    @staticmethod
+    def _string_values(value: object) -> list[str]:
+        if isinstance(value, str):
+            return [value.strip()] if value.strip() else []
+        if not isinstance(value, list):
+            return []
+        return [str(item).strip() for item in value if str(item).strip()]
+
+    @classmethod
+    def _instruction_values(cls, value: object) -> list[str]:
+        result: list[str] = []
+
+        def collect(item: object) -> None:
+            if isinstance(item, str):
+                text = item.strip()
+                if text:
+                    result.append(text)
+                return
+            if isinstance(item, list):
+                for child in item:
+                    collect(child)
+                return
+            if not isinstance(item, dict):
+                return
+
+            text = str(item.get("text", "")).strip()
+            if text:
+                result.append(text)
+            nested = item.get("itemListElement")
+            if nested:
+                collect(nested)
+
+        collect(value)
+        return result
+
+    @staticmethod
+    def _recipe_image(value: object) -> str | None:
+        if isinstance(value, str):
+            return value.strip() or None
+        if isinstance(value, list):
+            for item in value:
+                candidate = ArticleLoader._recipe_image(item)
+                if candidate:
+                    return candidate
+        if isinstance(value, dict):
+            candidate = value.get("url") or value.get("contentUrl")
+            if candidate:
+                return str(candidate).strip() or None
+        return None
+
+    @staticmethod
+    def _structured_recipe_text(recipe: dict[str, object]) -> str:
+        name = str(recipe["name"]).strip()
+        cuisine = str(recipe["cuisine"]).strip()
+        description = str(recipe["description"]).strip()
+        ingredients = [str(value) for value in recipe["ingredients"]]
+        instructions = [str(value) for value in recipe["instructions"]]
+
+        parts = [f"Recipe: {name}" if name else "Recipe"]
+        if cuisine:
+            parts.append(f"Cuisine: {cuisine}")
+        if description:
+            parts.append(f"Description: {description}")
+        parts.append("Ingredients:\n" + "\n".join(f"- {item}" for item in ingredients))
+        parts.append(
+            "Instructions:\n"
+            + "\n".join(
+                f"{index}. {step}"
+                for index, step in enumerate(instructions, start=1)
+            )
+        )
+        return "\n\n".join(parts)
 
     def _clean_image_url(self, value: str | None) -> str | None:
         if not value:
