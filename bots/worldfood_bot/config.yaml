@@ -12,6 +12,6 @@ defaults:
   max_articles_per_run: 1
   max_candidates: 160
   max_age_hours: 87600
-  publish_interval: 86400
+  publish_interval: 14400
 
 discovery_queries: []
