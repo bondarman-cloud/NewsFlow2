@@ -1,2 +1,2 @@
-WorldFood publication scheduler trigger.
-This file is updated automatically at 10:00, 14:00 and 18:00 America/Montevideo.
+2026-08-05T17:14:30Z
+America/Montevideo scheduled retry after missed 14:00 slot
