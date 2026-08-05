@@ -30,5 +30,5 @@ def test_worldfood_profile() -> None:
     assert profile.application == "worldfood"
     assert profile.filter_type == "recipe"
     assert profile.require_image is True
-    assert profile.publish_interval == 86400
+    assert profile.publish_interval == 14400
     assert profile.sources_path.name == "sources.yaml"
