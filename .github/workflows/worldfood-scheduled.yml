@@ -1,0 +1,27 @@
+name: Scheduled WorldFood publications
+run-name: Scheduled WorldFood publication
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".automation/worldfood-trigger.txt"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: ${{ startsWith(github.event.head_commit.message, 'Trigger scheduled WorldFood publication') }}
+    uses: ./.github/workflows/run-bot.yml
+    with:
+      bot_id: worldfood_bot
+      run_mode: scheduled
+      force_publish: false
+      database_path: data/worldfood_bot.db
+      cache_prefix: worldfood-db-v1
+      legacy_cache_prefix: worldfood-db-v1
+    secrets:
+      bot_token: ${{ secrets.WORLDFOOD_BOT_TOKEN }}
+      channel_id: ${{ secrets.WORLDFOOD_CHANNEL_ID }}
+      gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
