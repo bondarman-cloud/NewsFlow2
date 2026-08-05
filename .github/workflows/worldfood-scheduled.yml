@@ -6,13 +6,17 @@ on:
     branches: [main]
     paths:
       - ".automation/worldfood-trigger.txt"
+  schedule:
+    - cron: "0 10,14,18 * * *"
+      timezone: "America/Montevideo"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   publish:
-    if: ${{ startsWith(github.event.head_commit.message, 'Trigger scheduled WorldFood publication') }}
+    if: ${{ github.event_name != 'push' || startsWith(github.event.head_commit.message, 'Trigger scheduled WorldFood publication') }}
     uses: ./.github/workflows/run-bot.yml
     with:
       bot_id: worldfood_bot
