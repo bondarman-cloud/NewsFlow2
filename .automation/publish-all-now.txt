@@ -1,2 +1,2 @@
-2026-08-06T20:49:22Z
-Trigger immediate manual publication for hardware_news, tech_news, and worldfood_bot.
+2026-08-06T21:40:26Z
+Trigger immediate manual publication for hardware_news, tech_news, and worldfood_bot after removing the cancelling concurrency queue.
