@@ -1,2 +1,0 @@
-2026-08-06T21:43:43Z
-Trigger immediate manual publication for hardware_news, tech_news, and worldfood_bot after concurrency removal.
