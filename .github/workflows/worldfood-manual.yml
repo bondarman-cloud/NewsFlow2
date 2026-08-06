@@ -9,15 +9,64 @@ permissions:
 
 jobs:
   publish:
-    uses: ./.github/workflows/run-bot.yml
-    with:
-      bot_id: worldfood_bot
-      run_mode: manual
-      force_publish: true
-      database_path: data/worldfood_bot.db
-      cache_prefix: worldfood-db-v1
-      legacy_cache_prefix: worldfood-db-v1
-    secrets:
-      bot_token: ${{ secrets.WORLDFOOD_BOT_TOKEN }}
-      channel_id: ${{ secrets.WORLDFOOD_CHANNEL_ID }}
-      gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      BOT_ID: worldfood_bot
+      BOT_TOKEN: ${{ secrets.WORLDFOOD_BOT_TOKEN }}
+      CHANNEL_ID: ${{ secrets.WORLDFOOD_CHANNEL_ID }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      DATABASE_PATH: data/worldfood_bot.db
+      IMAGE_CACHE_DIR: cache/images/worldfood_bot
+      FORCE_PUBLISH: "true"
+      RUN_MODE: manual
+      LOG_LEVEL: INFO
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Prepare runtime
+        run: |
+          mkdir -p "$(dirname "$DATABASE_PATH")" "$IMAGE_CACHE_DIR"
+
+      - name: Restore publication database
+        uses: actions/cache@v4
+        with:
+          path: data/worldfood_bot.db
+          key: worldfood-db-v1-${{ github.run_id }}
+          restore-keys: |
+            worldfood-db-v1-
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+
+      - name: Validate profile and secrets
+        run: |
+          python - <<'PY'
+          import os
+          from app.config import settings
+
+          missing = [
+              name
+              for name in ("BOT_TOKEN", "CHANNEL_ID", "GEMINI_API_KEY")
+              if not os.getenv(name)
+          ]
+          if missing:
+              raise SystemExit("Missing GitHub secrets: " + ", ".join(missing))
+          print(f"Profile: {settings.bot_id} ({settings.title})")
+          print(f"Sources: {settings.sources_path}")
+          print(f"Database: {settings.database_path}")
+          PY
+
+      - name: Publish one article
+        run: python main.py --bot "$BOT_ID" --mode "$RUN_MODE" --force
