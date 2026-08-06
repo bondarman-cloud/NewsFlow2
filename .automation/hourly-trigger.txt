@@ -1,1 +1,2 @@
-2026-08-06T20:58:07Z
+2026-08-06T21:32:49Z
+Immediate forced publication for hardware_news and tech_news.
