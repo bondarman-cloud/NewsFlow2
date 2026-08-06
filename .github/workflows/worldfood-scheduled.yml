@@ -7,8 +7,8 @@ on:
     paths:
       - ".automation/worldfood-trigger.txt"
   schedule:
-    - cron: "0 10,14,18 * * *"
-      timezone: "America/Montevideo"
+    # 10:00, 14:00 и 18:00 по времени Уругвая (UTC-3)
+    - cron: "0 13,17,21 * * *"
   workflow_dispatch:
 
 permissions:
