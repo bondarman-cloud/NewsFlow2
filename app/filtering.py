@@ -84,19 +84,14 @@ class HardwareNewsFilter:
         release_hits = sum(term in text for term in self.RELEASE_KEYWORDS)
         title_release_hits = sum(term in title for term in self.RELEASE_KEYWORDS)
         model_like = bool(re.search(r"\b[A-Z]{1,6}[- ]?\d{2,5}[A-Z0-9-]*\b", article.title))
-        storage_bonus = sum(
-            term in text
-            for term in (
-                "ssd", "nvme", "hard drive", "hdd", "ddr5", "ddr6",
-                "memory kit", "dram", "nand",
-            )
-        )
 
+        # Do not give storage and memory launches a special category bonus. That bonus
+        # used to keep SSD/DDR5 vendors at the top of every run and crowded out GPUs,
+        # CPUs, monitors, cooling, cases and peripherals.
         return (
             product_hits * 4
             + release_hits * 5
             + title_release_hits * 4
-            + storage_bonus * 4
             + (3 if model_like else 0)
         )
 
@@ -196,9 +191,13 @@ class RecipeFilter:
 
         recipe_hits = sum(term in text for term in self.RECIPE_KEYWORDS)
         cuisine_hits = sum(term in text for term in self.CUISINE_KEYWORDS)
+
+        # A named cuisine is useful metadata, not a quality signal. Giving it a large
+        # bonus made explicitly labelled Greek recipes outrank equally complete recipes
+        # whose titles did not repeat the cuisine name.
         return (
             recipe_hits * 4
-            + cuisine_hits * 6
+            + min(cuisine_hits, 1)
             + (8 if article.is_recipe_source else 0)
             + (5 if article.from_archive else 0)
             + (8 if "/recipe" in path else 0)
