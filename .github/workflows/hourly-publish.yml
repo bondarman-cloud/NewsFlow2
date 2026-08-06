@@ -6,8 +6,6 @@ on:
     branches: [main]
     paths:
       - ".automation/hourly-trigger.txt"
-  # Backup trigger. The external hourly automation remains the primary scheduler,
-  # while GitHub cron gives us a second chance if that automation is paused.
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
@@ -20,8 +18,8 @@ jobs:
     uses: ./.github/workflows/run-bot.yml
     with:
       bot_id: hardware_news
-      run_mode: scheduled
-      force_publish: false
+      run_mode: manual
+      force_publish: true
       database_path: data/newsflow2.db
       cache_prefix: hardware-news-db-v1
       legacy_cache_prefix: newsflow2-db-v6
@@ -31,12 +29,11 @@ jobs:
       gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
 
   technology:
-    if: ${{ vars.ENABLE_TECH_NEWS == 'true' }}
     uses: ./.github/workflows/run-bot.yml
     with:
       bot_id: tech_news
-      run_mode: scheduled
-      force_publish: false
+      run_mode: manual
+      force_publish: true
       database_path: data/tech_news.db
       cache_prefix: tech-news-db-v1
       legacy_cache_prefix: tech-news-db-v1
