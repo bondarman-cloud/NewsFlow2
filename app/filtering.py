@@ -60,11 +60,15 @@ class HardwareNewsFilter:
         "leak", "leaked", "benchmark leak", "concept product",
     }
 
+    BLOCKED_SOURCES = {"Patriot / Viper"}
+
     @staticmethod
     def _normalize(value: str) -> str:
         return re.sub(r"\s+", " ", value.lower()).strip()
 
     def accepts(self, article: Article) -> bool:
+        if article.source in self.BLOCKED_SOURCES:
+            return False
         text = self._normalize(f"{article.title} {article.rss_summary}")
         if any(term in text for term in self.LAPTOP_KEYWORDS):
             return False
@@ -73,6 +77,8 @@ class HardwareNewsFilter:
         return any(term in text for term in self.PRODUCT_KEYWORDS)
 
     def priority(self, article: Article) -> int:
+        if article.source in self.BLOCKED_SOURCES:
+            return -10_000
         title = self._normalize(article.title)
         text = self._normalize(f"{article.title} {article.rss_summary}")
         if any(term in text for term in self.LAPTOP_KEYWORDS):
@@ -85,9 +91,6 @@ class HardwareNewsFilter:
         title_release_hits = sum(term in title for term in self.RELEASE_KEYWORDS)
         model_like = bool(re.search(r"\b[A-Z]{1,6}[- ]?\d{2,5}[A-Z0-9-]*\b", article.title))
 
-        # Do not give storage and memory launches a special category bonus. That bonus
-        # used to keep SSD/DDR5 vendors at the top of every run and crowded out GPUs,
-        # CPUs, monitors, cooling, cases and peripherals.
         return (
             product_hits * 4
             + release_hits * 5
@@ -160,12 +163,15 @@ class RecipeFilter:
         "/category/", "/tag/", "/author/", "/page/", "/news/", "/travel/",
         "/restaurant", "/menu", "/roundup", "/collection", "/best-",
     )
+    BLOCKED_SOURCES = {"My Greek Dish"}
 
     @staticmethod
     def _normalize(value: str) -> str:
         return re.sub(r"\s+", " ", value.lower()).strip()
 
     def accepts(self, article: Article) -> bool:
+        if article.source in self.BLOCKED_SOURCES:
+            return False
         text = self._normalize(f"{article.title} {article.rss_summary}")
         path = urlparse(article.url).path.lower()
         if len(article.title.strip()) < 5:
@@ -182,6 +188,8 @@ class RecipeFilter:
         )
 
     def priority(self, article: Article) -> int:
+        if article.source in self.BLOCKED_SOURCES:
+            return -10_000
         text = self._normalize(f"{article.title} {article.rss_summary}")
         path = urlparse(article.url).path.lower()
         if any(term in text for term in self.EXCLUDED_KEYWORDS):
@@ -192,9 +200,6 @@ class RecipeFilter:
         recipe_hits = sum(term in text for term in self.RECIPE_KEYWORDS)
         cuisine_hits = sum(term in text for term in self.CUISINE_KEYWORDS)
 
-        # A named cuisine is useful metadata, not a quality signal. Giving it a large
-        # bonus made explicitly labelled Greek recipes outrank equally complete recipes
-        # whose titles did not repeat the cuisine name.
         return (
             recipe_hits * 4
             + min(cuisine_hits, 1)
