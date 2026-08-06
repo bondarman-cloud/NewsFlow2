@@ -1,2 +1,2 @@
-2026-08-06T19:13:30Z
-America/Montevideo recovery trigger
+2026-08-06T21:02:04Z
+America/Montevideo scheduled slot
