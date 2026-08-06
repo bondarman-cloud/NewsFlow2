@@ -32,10 +32,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ inputs.bot_id }}-${{ inputs.run_mode }}-production
-  cancel-in-progress: false
-
 jobs:
   publish:
     runs-on: ubuntu-latest
