@@ -33,7 +33,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ inputs.bot_id }}-production
+  group: ${{ inputs.bot_id }}-${{ inputs.run_mode }}-production
   cancel-in-progress: false
 
 jobs:
