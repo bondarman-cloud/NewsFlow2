@@ -20,8 +20,8 @@ jobs:
     uses: ./.github/workflows/run-bot.yml
     with:
       bot_id: worldfood_bot
-      run_mode: manual
-      force_publish: true
+      run_mode: scheduled
+      force_publish: false
       database_path: data/worldfood_bot.db
       cache_prefix: worldfood-db-v1
       legacy_cache_prefix: worldfood-db-v1
