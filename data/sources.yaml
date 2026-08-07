@@ -1,132 +1,96 @@
 sources:
-  # Desktop PC and component manufacturers
-  - name: MSI
-    url: "https://news.google.com/rss/search?q=site%3Amsi.com+%28motherboard+OR+%22graphics+card%22+OR+monitor+OR+desktop+OR+%22mini+PC%22+OR+PSU+OR+cooler%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: ASUS / ROG
-    url: "https://news.google.com/rss/search?q=site%3Apress.asus.com+%28motherboard+OR+%22graphics+card%22+OR+monitor+OR+desktop+OR+%22mini+PC%22+OR+router+OR+PSU%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Acer / Predator
-    url: "https://news.google.com/rss/search?q=site%3Anews.acer.com+%28Predator+OR+monitor+OR+desktop%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Colorful
-    url: "https://news.google.com/rss/search?q=site%3Acolorful.cn+%28%22graphics+card%22+OR+motherboard+OR+SSD+OR+memory%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: GIGABYTE / AORUS
-    url: "https://news.google.com/rss/search?q=site%3Agigabyte.com+%28motherboard+OR+%22graphics+card%22+OR+monitor+OR+desktop+OR+%22mini+PC%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: ASRock
-    url: "https://news.google.com/rss/search?q=site%3Aasrock.com+%28motherboard+OR+%22graphics+card%22+OR+%22mini+PC%22+OR+monitor%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: ZOTAC
-    url: "https://news.google.com/rss/search?q=site%3Azotac.com+%28%22graphics+card%22+OR+GPU+OR+%22mini+PC%22%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Lenovo / Legion desktops
-    url: "https://news.google.com/rss/search?q=site%3Alenovo.com+%28desktop+OR+tower+OR+monitor+OR+%22mini+PC%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Dell / Alienware desktops
-    url: "https://news.google.com/rss/search?q=site%3Adell.com+%28Alienware+desktop+OR+gaming+desktop+OR+monitor%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: HP / OMEN desktops
-    url: "https://news.google.com/rss/search?q=site%3Ahp.com+%28OMEN+desktop+OR+gaming+desktop+OR+monitor%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: MINISFORUM
-    url: "https://news.google.com/rss/search?q=site%3Astore.minisforum.com+MINISFORUM+%22mini+PC%22+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-
-  # CPUs and GPUs
-  - name: NVIDIA
-    url: "https://news.google.com/rss/search?q=site%3Anvidia.com+%28GeForce+OR+GPU+OR+%22graphics+card%22%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: AMD
-    url: "https://news.google.com/rss/search?q=site%3Aamd.com+%28Ryzen+OR+Radeon+OR+processor+OR+GPU%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Intel
-    url: "https://news.google.com/rss/search?q=site%3Aintel.com+%28processor+OR+graphics+OR+desktop+CPU%29+-laptop+-notebook+-mobile+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-
-  # Memory, SSDs, HDDs and storage controllers
-  - name: Kingston / Kingston FURY
-    url: "https://news.google.com/rss/search?q=site%3Akingston.com+%28Kingston+FURY+OR+SSD+OR+DDR5+OR+memory%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Crucial
-    url: "https://news.google.com/rss/search?q=site%3Acrucial.com+%28Crucial+SSD+OR+DDR5+OR+memory%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: G.SKILL
-    url: "https://news.google.com/rss/search?q=site%3Agskill.com+%28G.SKILL+DDR5+OR+memory%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: TEAMGROUP / T-FORCE
-    url: "https://news.google.com/rss/search?q=site%3Ateamgroupinc.com+%28TEAMGROUP+OR+T-FORCE+SSD+OR+DDR5%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: ADATA
-    url: "https://news.google.com/rss/search?q=site%3Aadata.com+%28ADATA+SSD+OR+DDR5+OR+memory%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: XPG
-    url: "https://news.google.com/rss/search?q=site%3Axpg.com+%28XPG+SSD+OR+DDR5+OR+memory%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Lexar
-    url: "https://news.google.com/rss/search?q=site%3Alexar.com+%28Lexar+SSD+OR+DDR5+OR+memory%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Patriot / Viper
-    url: "https://news.google.com/rss/search?q=site%3Apatriotmemory.com+%28Patriot+OR+Viper+SSD+OR+DDR5%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: KLEVV
-    url: "https://news.google.com/rss/search?q=site%3Aklevv.com+%28KLEVV+SSD+OR+DDR5%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: PNY
-    url: "https://news.google.com/rss/search?q=site%3Apny.com+%28PNY+SSD+OR+memory+OR+graphics%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Silicon Power
-    url: "https://news.google.com/rss/search?q=site%3Asilicon-power.com+%28SSD+OR+DDR5+OR+memory%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Sabrent
-    url: "https://news.google.com/rss/search?q=site%3Asabrent.com+%28Sabrent+SSD+OR+storage%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Transcend
-    url: "https://news.google.com/rss/search?q=site%3Atranscend-info.com+%28Transcend+SSD+OR+memory%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Solidigm
-    url: "https://news.google.com/rss/search?q=site%3Asolidigm.com+Solidigm+SSD+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: SK hynix
-    url: "https://news.google.com/rss/search?q=site%3Anews.skhynix.com+%28SSD+OR+NAND+OR+DRAM%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Western Digital
-    url: "https://news.google.com/rss/search?q=site%3Awesterndigital.com+%28Western+Digital+SSD+OR+hard+drive+OR+storage%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: SanDisk
-    url: "https://news.google.com/rss/search?q=site%3Asandisk.com+%28SanDisk+SSD+OR+storage%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Seagate
-    url: "https://news.google.com/rss/search?q=site%3Aseagate.com+%28Seagate+hard+drive+OR+SSD+OR+storage%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: KIOXIA
-    url: "https://news.google.com/rss/search?q=site%3Akioxia.com+%28KIOXIA+SSD+OR+NAND%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Micron
-    url: "https://news.google.com/rss/search?q=site%3Amicron.com+%28Micron+SSD+OR+NAND+OR+DRAM%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: BIWIN
-    url: "https://news.google.com/rss/search?q=site%3Abiwintech.com+%28BIWIN+SSD+OR+DDR5%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Phison
-    url: "https://news.google.com/rss/search?q=site%3Aphison.com+%28Phison+SSD+OR+controller%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-
-  # Cases, power supplies and cooling
-  - name: Corsair
-    url: "https://news.google.com/rss/search?q=site%3Acorsair.com+%28Corsair+memory+OR+SSD+OR+case+OR+cooler+OR+PSU%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Cooler Master
-    url: "https://news.google.com/rss/search?q=site%3Acoolermaster.com+%28Cooler+Master+case+OR+cooler+OR+PSU%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Thermaltake
-    url: "https://news.google.com/rss/search?q=site%3Athermaltake.com+%28Thermaltake+case+OR+cooler+OR+PSU%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Noctua
-    url: "https://news.google.com/rss/search?q=site%3Anoctua.at+%28Noctua+cooler+OR+fan%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: be quiet!
-    url: "https://news.google.com/rss/search?q=site%3Abequiet.com+%28be+quiet+case+OR+cooler+OR+PSU%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  # Official manufacturer domains only. No media, retailers or aggregators.
+  - name: ADATA / XPG
+    url: "https://news.google.com/rss/search?q=%28site%3Aadata.com+OR+site%3Axpg.com%29+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: ARCTIC
-    url: "https://news.google.com/rss/search?q=site%3Aarctic.de+%28ARCTIC+cooler+OR+fan%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Lian Li
-    url: "https://news.google.com/rss/search?q=site%3Alian-li.com+%28Lian+Li+case+OR+cooler%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Fractal Design
-    url: "https://news.google.com/rss/search?q=site%3Afractal-design.com+%28Fractal+Design+case+OR+cooler%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: NZXT
-    url: "https://news.google.com/rss/search?q=site%3Anzxt.com+%28NZXT+case+OR+cooler+OR+PSU%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Seasonic
-    url: "https://news.google.com/rss/search?q=site%3Aseasonic.com+%28Seasonic+power+supply+OR+PSU%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Aarctic.de+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: ASRock
+    url: "https://news.google.com/rss/search?q=site%3Aasrock.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: ASUS
+    url: "https://news.google.com/rss/search?q=site%3Apress.asus.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: be quiet!
+    url: "https://news.google.com/rss/search?q=site%3Abequiet.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: BIOSTAR
+    url: "https://news.google.com/rss/search?q=site%3Abiostar.com.tw+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Colorful
+    url: "https://news.google.com/rss/search?q=site%3Acolorful.cn+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Cooler Master
+    url: "https://news.google.com/rss/search?q=site%3Acoolermaster.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Corsair
+    url: "https://news.google.com/rss/search?q=site%3Acorsair.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Crucial / Micron
+    url: "https://news.google.com/rss/search?q=%28site%3Acrucial.com+OR+site%3Amicron.com%29+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: DeepCool
-    url: "https://news.google.com/rss/search?q=site%3Adeepcool.com+%28DeepCool+case+OR+cooler+OR+PSU%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Adeepcool.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: FSP Group
+    url: "https://news.google.com/rss/search?q=site%3Afsp-group.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Fractal Design
+    url: "https://news.google.com/rss/search?q=site%3Afractal-design.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: G.SKILL
+    url: "https://news.google.com/rss/search?q=site%3Agskill.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Gainward
+    url: "https://news.google.com/rss/search?q=site%3Againward.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: GIGABYTE
+    url: "https://news.google.com/rss/search?q=site%3Agigabyte.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: HYTE
+    url: "https://news.google.com/rss/search?q=site%3Ahyte.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: ID-COOLING
+    url: "https://news.google.com/rss/search?q=site%3Aidcooling.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: INNO3D
+    url: "https://news.google.com/rss/search?q=site%3Ainno3d.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Kingston
+    url: "https://news.google.com/rss/search?q=site%3Akingston.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Lexar
+    url: "https://news.google.com/rss/search?q=site%3Alexar.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Lian Li
+    url: "https://news.google.com/rss/search?q=site%3Alian-li.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: MAXSUN
+    url: "https://news.google.com/rss/search?q=site%3Amaxsun.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: MONTECH
+    url: "https://news.google.com/rss/search?q=site%3Amontechpc.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: MSI
+    url: "https://news.google.com/rss/search?q=site%3Amsi.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Netac
+    url: "https://news.google.com/rss/search?q=site%3Anetac.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Noctua
+    url: "https://news.google.com/rss/search?q=site%3Anoctua.at+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: NZXT
+    url: "https://news.google.com/rss/search?q=site%3Anzxt.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: ONDA
+    url: "https://news.google.com/rss/search?q=site%3Aonda.cn+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Palit
+    url: "https://news.google.com/rss/search?q=site%3Apalit.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: Phanteks
-    url: "https://news.google.com/rss/search?q=site%3Aphanteks.com+%28Phanteks+case+OR+cooler%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: SilverStone
-    url: "https://news.google.com/rss/search?q=site%3Asilverstonetek.com+%28SilverStone+case+OR+cooler+OR+PSU%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-
-  # Monitors
-  - name: LG
-    url: "https://news.google.com/rss/search?q=site%3Algnewsroom.com+%28monitor+OR+display%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Aphanteks.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: PowerColor
+    url: "https://news.google.com/rss/search?q=site%3Apowercolor.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
   - name: Samsung
-    url: "https://news.google.com/rss/search?q=site%3Anews.samsung.com+%28monitor+OR+display+OR+SSD%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: BenQ
-    url: "https://news.google.com/rss/search?q=site%3Abenq.com+%28monitor+OR+display%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: ViewSonic
-    url: "https://news.google.com/rss/search?q=site%3Aviewsonic.com+%28monitor+OR+display%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: AOC / AGON
-    url: "https://news.google.com/rss/search?q=site%3Aagonbyaoc.com+%28AOC+OR+AGON%29+monitor+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-
-  # Peripherals and creator hardware
-  - name: Logitech G
-    url: "https://news.google.com/rss/search?q=site%3Alogitechg.com+%28Logitech+G+keyboard+OR+mouse+OR+headset%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Razer
-    url: "https://news.google.com/rss/search?q=site%3Arazer.com+%28Razer+keyboard+OR+mouse+OR+headset%29+-laptop+-notebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: SteelSeries
-    url: "https://news.google.com/rss/search?q=site%3Asteelseries.com+%28SteelSeries+keyboard+OR+mouse+OR+headset%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: HyperX
-    url: "https://news.google.com/rss/search?q=site%3Ahyperx.com+%28HyperX+keyboard+OR+mouse+OR+headset+OR+microphone%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Elgato
-    url: "https://news.google.com/rss/search?q=site%3Aelgato.com+%28Elgato+microphone+OR+capture+card+OR+webcam%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
-  - name: Turtle Beach
-    url: "https://news.google.com/rss/search?q=site%3Aturtlebeach.com+%28Turtle+Beach+headset+OR+controller%29+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+    url: "https://news.google.com/rss/search?q=site%3Anews.samsung.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: SAPPHIRE
+    url: "https://news.google.com/rss/search?q=site%3Asapphiretech.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Seasonic
+    url: "https://news.google.com/rss/search?q=site%3Aseasonic.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Silicon Power
+    url: "https://news.google.com/rss/search?q=site%3Asilicon-power.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: SK hynix
+    url: "https://news.google.com/rss/search?q=site%3Anews.skhynix.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Solidigm
+    url: "https://news.google.com/rss/search?q=site%3Asolidigm.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Super Flower
+    url: "https://news.google.com/rss/search?q=site%3Asuper-flower.com.tw+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Supermicro
+    url: "https://news.google.com/rss/search?q=site%3Asupermicro.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: TEAMGROUP
+    url: "https://news.google.com/rss/search?q=site%3Ateamgroupinc.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Thermalright
+    url: "https://news.google.com/rss/search?q=site%3Athermalright.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Thermaltake
+    url: "https://news.google.com/rss/search?q=site%3Athermaltake.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: VALKYRIE
+    url: "https://news.google.com/rss/search?q=site%3Avalkyrie.com.cn+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: Western Digital / WD
+    url: "https://news.google.com/rss/search?q=site%3Awesterndigital.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: XFX
+    url: "https://news.google.com/rss/search?q=site%3Axfxforce.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
+  - name: ZOTAC
+    url: "https://news.google.com/rss/search?q=site%3Azotac.com+%28launch+OR+launches+OR+announce+OR+announces+OR+unveil+OR+unveils+OR+release+OR+releases+OR+%22now+available%22%29+-laptop+-notebook+-chromebook+when%3A90d&hl=en-US&gl=US&ceid=US%3Aen"
