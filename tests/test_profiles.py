@@ -14,7 +14,14 @@ def test_hardware_profile() -> None:
     assert profile.application == "news"
     assert profile.filter_type == "hardware"
     assert profile.require_image is True
+    assert profile.official_sources_only is True
     assert profile.discovery_queries
+    assert all(
+        "techpowerup.com" not in item["query"].lower()
+        and "tomshardware.com" not in item["query"].lower()
+        and "videocardz.com" not in item["query"].lower()
+        for item in profile.discovery_queries
+    )
 
 
 def test_tech_profile() -> None:
@@ -22,6 +29,7 @@ def test_tech_profile() -> None:
     assert profile.application == "news"
     assert profile.filter_type == "tech"
     assert profile.require_image is False
+    assert profile.official_sources_only is False
     assert profile.sources_path.name == "sources.yaml"
 
 
@@ -30,5 +38,6 @@ def test_worldfood_profile() -> None:
     assert profile.application == "worldfood"
     assert profile.filter_type == "recipe"
     assert profile.require_image is True
+    assert profile.official_sources_only is False
     assert profile.publish_interval == 14400
     assert profile.sources_path.name == "sources.yaml"

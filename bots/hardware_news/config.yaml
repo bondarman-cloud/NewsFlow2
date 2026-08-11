@@ -5,6 +5,7 @@ base_tag: железо
 sources: data/sources.yaml
 prompt: bots/hardware_news/prompt.txt
 require_image: true
+official_sources_only: true
 query_exclusions: "-laptop -notebook -chromebook -ultrabook"
 
 defaults:
@@ -38,15 +39,3 @@ discovery_queries:
       (announces OR launches OR unveils OR introduces OR releases OR available)
       (keyboard OR mouse OR headset OR microphone OR webcam OR "capture card" OR
       controller OR router) when:30d
-  - name: TechPowerUp desktop hardware
-    query: >-
-      site:techpowerup.com (SSD OR DDR5 OR GPU OR motherboard OR monitor OR cooler OR
-      keyboard OR mouse OR desktop OR "mini PC") when:30d
-  - name: Tom's Hardware desktop launches
-    query: >-
-      site:tomshardware.com (launches OR announces OR unveils OR releases OR available)
-      (SSD OR DDR5 OR GPU OR CPU OR motherboard OR monitor OR desktop OR "mini PC") when:30d
-  - name: VideoCardz desktop launches
-    query: >-
-      site:videocardz.com (launches OR announces OR unveils OR releases OR available)
-      (GPU OR CPU OR motherboard OR memory OR SSD OR monitor OR desktop OR "mini PC") when:30d
