@@ -10,6 +10,7 @@ from app.formatter import PostFormatter
 from app.images import ImageService
 from app.logger import logger
 from app.models import Article
+from app.source_policy import OfficialSourcePolicy
 from app.sources import SourceManager
 from app.telegram import TelegramPublisher
 
@@ -27,6 +28,11 @@ class NewsFlowService:
         self._editor = GeminiEditor()
         self._formatter = PostFormatter()
         self._telegram = TelegramPublisher()
+        self._official_source_policy = (
+            OfficialSourcePolicy(settings.sources_path)
+            if settings.official_sources_only
+            else None
+        )
 
     def _interval_has_elapsed(self) -> bool:
         if settings.force_publish:
@@ -66,6 +72,28 @@ class NewsFlowService:
 
         return selected
 
+    def _apply_official_source_policy(self, article: Article) -> bool:
+        if self._official_source_policy is None:
+            return True
+
+        canonical_source = self._official_source_policy.canonical_source(article.url)
+        if canonical_source is None:
+            logger.info(
+                "Кандидат отклонён: конечный URL не относится к официальному источнику: {}",
+                article.url,
+            )
+            return False
+
+        if article.source != canonical_source:
+            logger.info(
+                "Источник нормализован: {} -> {} ({})",
+                article.source,
+                canonical_source,
+                article.url,
+            )
+        article.source = canonical_source
+        return True
+
     async def run(self) -> int:
         if not self._interval_has_elapsed():
             await self._telegram.close()
@@ -77,6 +105,7 @@ class NewsFlowService:
             "duplicates": 0,
             "load_errors": 0,
             "feed_fallbacks": 0,
+            "unofficial_sources": 0,
             "no_image": 0,
             "ai_rejected": 0,
             "ai_attempts": 0,
@@ -89,6 +118,12 @@ class NewsFlowService:
                 settings.title,
                 settings.run_mode,
             )
+            if self._official_source_policy is not None:
+                logger.info(
+                    "Для {} включён строгий режим: публикации только с официальных доменов производителей",
+                    settings.bot_id,
+                )
+
             articles = await self._sources.fetch()
             articles.sort(
                 key=lambda item: (
@@ -151,6 +186,15 @@ class NewsFlowService:
                 if article.used_feed_fallback:
                     counters["feed_fallbacks"] += 1
 
+                if not self._apply_official_source_policy(article):
+                    counters["unofficial_sources"] += 1
+                    self._database.save(
+                        article,
+                        "unofficial_source",
+                        aliases=(original_url,),
+                    )
+                    continue
+
                 if self._database.is_duplicate(
                     article,
                     retry_non_published=settings.force_publish,
@@ -209,14 +253,15 @@ class NewsFlowService:
 
             logger.info(
                 "Итог [{}]: опубликовано={}, локально отсеяно={}, дубли={}, "
-                "RSS-fallback={}, ошибки загрузки={}, без картинки={}, "
-                "AI-проверок={}, отклонено AI={}",
+                "RSS-fallback={}, ошибки загрузки={}, неофициальные источники={}, "
+                "без картинки={}, AI-проверок={}, отклонено AI={}",
                 settings.bot_id,
                 published,
                 counters["local_filtered"],
                 counters["duplicates"],
                 counters["feed_fallbacks"],
                 counters["load_errors"],
+                counters["unofficial_sources"],
                 counters["no_image"],
                 counters["ai_attempts"],
                 counters["ai_rejected"],
