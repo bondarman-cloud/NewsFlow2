@@ -22,6 +22,7 @@ class BotProfile:
     sources_path: Path
     prompt_path: Path
     require_image: bool
+    official_sources_only: bool
     discovery_queries: tuple[dict[str, str], ...]
     query_exclusions: str
     max_articles_per_run: int
@@ -74,6 +75,7 @@ def load_bot_profile(bot_id: str | None = None, root: Path | None = None) -> Bot
         sources_path=relative_path("sources", str(profile_dir / "sources.yaml")),
         prompt_path=relative_path("prompt", str(profile_dir / "prompt.txt")),
         require_image=bool(data.get("require_image", True)),
+        official_sources_only=bool(data.get("official_sources_only", False)),
         discovery_queries=queries,
         query_exclusions=str(data.get("query_exclusions", "")).strip(),
         max_articles_per_run=int(defaults.get("max_articles_per_run", 1)),
@@ -148,6 +150,10 @@ class Settings(BaseSettings):
     @property
     def require_image(self) -> bool:
         return profile.require_image
+
+    @property
+    def official_sources_only(self) -> bool:
+        return profile.official_sources_only
 
     @property
     def discovery_queries(self) -> tuple[dict[str, str], ...]:
