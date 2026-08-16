@@ -1,2 +1,2 @@
-2026-08-13T17:00:03Z
-America/Montevideo scheduled slot
+2026-08-16T13:15:00Z
+America/Montevideo manual recovery after missed 10:00 slot
